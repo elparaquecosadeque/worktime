@@ -46,7 +46,7 @@ interface RowState { asking?: Exclude<Decision, 'Approve'>; reason?: string; bus
         <span class="font-bold tabular-nums" i18n="@@inbox.selected">{{ selected().size }} seleccionados</span>
         <input class="input !min-h-9 max-w-xs flex-1 !bg-ground" [(ngModel)]="batchReason" i18n-placeholder="@@inbox.batchReasonPh" placeholder="Razón (para revisión o rechazo)" />
         <div class="ml-auto flex flex-wrap gap-2">
-          <button type="button" class="btn btn-go btn-sm" (click)="batch('Approve')" [disabled]="batching()"><app-icon name="check" [size]="16" /><ng-container i18n="@@inbox.approveAll">Aprobar</ng-container></button>
+          <button type="button" class="btn btn-sm !bg-ground !text-ink" (click)="batch('Approve')" [disabled]="batching()"><app-icon name="check" [size]="16" /><ng-container i18n="@@inbox.approveAll">Aprobar</ng-container></button>
           <button type="button" class="btn btn-sm !bg-back" (click)="batch('RequestRevision')" [disabled]="batching() || !batchReason.trim()"><app-icon name="back" [size]="16" /><ng-container i18n="@@inbox.revisionAll">Pedir corrección</ng-container></button>
           <button type="button" class="btn btn-stop btn-sm" (click)="batch('Reject')" [disabled]="batching() || !batchReason.trim()"><app-icon name="cross" [size]="16" /><ng-container i18n="@@inbox.rejectAll">Rechazar</ng-container></button>
           <button type="button" class="btn btn-sm !bg-transparent !text-ground underline" (click)="clearSelection()" i18n="@@inbox.clear">Quitar selección</button>
@@ -94,7 +94,7 @@ interface RowState { asking?: Exclude<Decision, 'Approve'>; reason?: string; bus
                 </form>
               } @else {
                 <div class="flex flex-wrap gap-2">
-                  <button type="button" class="btn btn-go btn-sm" (click)="decide(log, 'Approve', null)" [disabled]="st.busy"><app-icon name="check" [size]="16" /><ng-container i18n="@@inbox.approve">Aprobar</ng-container></button>
+                  <button type="button" class="btn btn-sm" (click)="decide(log, 'Approve', null)" [disabled]="st.busy"><app-icon name="check" [size]="16" /><ng-container i18n="@@inbox.approve">Aprobar</ng-container></button>
                   <button type="button" class="btn btn-quiet btn-sm" (click)="setState(log.id, { asking: 'RequestRevision' })" i18n="@@inbox.revision">Corrección</button>
                   <button type="button" class="btn btn-quiet btn-sm" (click)="setState(log.id, { asking: 'Reject' })" i18n="@@inbox.reject">Rechazar</button>
                 </div>

@@ -37,7 +37,8 @@ internal sealed class UserRepository(WorktimeDbContext db) : IUserRepository
     public async Task<User?> GetAsync(Guid id, CancellationToken ct) => await db.Users.FindAsync([id], ct);
 
     public Task<User?> GetForShareAsync(Guid id, CancellationToken ct) =>
-        db.Users.FromSql($"SELECT * FROM users WHERE id = {id} FOR SHARE").SingleOrDefaultAsync(ct);
+        // xmin is a system column: "*" does not include it, and EF needs it as the concurrency token.
+        db.Users.FromSql($"SELECT *, xmin FROM users WHERE id = {id} FOR SHARE").SingleOrDefaultAsync(ct);
 
     public Task<User?> GetByEmailAsync(string email, CancellationToken ct) => db.Users.SingleOrDefaultAsync(u => u.Email == email, ct);
 

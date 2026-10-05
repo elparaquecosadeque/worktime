@@ -53,7 +53,9 @@ public sealed class MyMonthHandler(IUserRepository users, IWorkLogReads reads) :
     {
         var start = new DateTime(year, month, 1);
         var end = start.AddMonths(1);
-        return (new DateTimeOffset(start, zone.GetUtcOffset(start)), new DateTimeOffset(end, zone.GetUtcOffset(end)));
+        // timestamptz parameters must be UTC (offset 0) for Npgsql.
+        return (new DateTimeOffset(start, zone.GetUtcOffset(start)).ToUniversalTime(),
+                new DateTimeOffset(end, zone.GetUtcOffset(end)).ToUniversalTime());
     }
 }
 
@@ -66,7 +68,7 @@ public sealed class InboxHandler(IWorkLogReads reads) : IQueryHandler<InboxQuery
     {
         if (q.OrphansOnly && !q.Actor.SeesAllTeams) throw new ForbiddenException("worklog.orphans_admin_only");
         var supervisorId = q.Actor.SeesAllTeams ? (Guid?)null : q.Actor.Id;
-        return await reads.ListPendingAsync(supervisorId, q.OrphansOnly, q.WorkerId, q.From, q.To, ct);
+        return await reads.ListPendingAsync(supervisorId, q.OrphansOnly, q.WorkerId, q.From?.ToUniversalTime(), q.To?.ToUniversalTime(), ct);
     }
 }
 

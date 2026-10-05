@@ -37,9 +37,9 @@ import { PresencePlate } from '../../ui/plates';
             }
           </h2>
         }
-        <ul class="mt-5 grid gap-px overflow-hidden rounded-[2px] bg-rule shadow-[0_0_0_1px_var(--color-rule)] sm:grid-cols-2 lg:grid-cols-3">
+        <ul class="mt-5 grid border-l border-t border-rule sm:grid-cols-2 lg:grid-cols-3">
           @for (m of g.members; track m.workerId) {
-            <li class="flex flex-col gap-3 bg-card p-4">
+            <li class="flex flex-col gap-3 border-b border-r border-rule bg-card p-4">
               <div class="flex items-start justify-between gap-3">
                 <span class="text-lg font-bold leading-tight">{{ m.name }}</span>
                 @if (m.pendingCount) {
@@ -59,7 +59,7 @@ import { PresencePlate } from '../../ui/plates';
               }
             </li>
           } @empty {
-            <li class="bg-card p-5 text-ink-2 sm:col-span-2 lg:col-span-3">
+            <li class="border-b border-r border-rule bg-card p-5 text-ink-2 sm:col-span-2 lg:col-span-3">
               @if (g.supervisorId === null) { <span i18n="@@team.noOrphans">Todos los trabajadores tienen supervisor.</span> }
               @else { <span i18n="@@team.empty">Todavía no hay trabajadores aquí. Créalos o pide al admin que te asigne.</span> }
             </li>

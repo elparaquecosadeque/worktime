@@ -35,9 +35,9 @@ const FULL_DAY_HOURS = 12;
     <!-- Month totals, one plate per state, hours in tabular figures. -->
     <dl class="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-4">
       @for (s of order; track s) {
-        <div class="flex items-center justify-between gap-3 rounded-[2px] px-3 pb-2 pt-2.5" [class]="plate(s)">
+        <div class="flex flex-col items-start gap-0.5 rounded-[2px] px-3 pb-2 pt-2.5 sm:flex-row sm:items-center sm:justify-between sm:gap-3" [class]="totalHours()[s] > 0 ? plate(s) : 'text-ink-3 shadow-[inset_0_0_0_1px_var(--color-rule)]'">
           <dt class="text-xs font-bold uppercase tracking-[0.06em]">{{ label(s) }}</dt>
-          <dd class="text-lg font-extrabold tabular-nums">{{ totals()[s] }}</dd>
+          <dd class="whitespace-nowrap text-lg font-extrabold tabular-nums">{{ totals()[s] }}</dd>
         </div>
       }
     </dl>
@@ -73,10 +73,18 @@ const FULL_DAY_HOURS = 12;
             }
           </div>
           <div class="mt-3 divide-y divide-rule border-y border-rule">
+            @if (day.key === todayKey() && workingSince(); as since) {
+              <div class="flex items-center justify-between gap-4 py-3">
+                <div class="text-lg font-bold tabular-nums">{{ clock().time(since) }}–<span class="text-ink-2" i18n="@@today.ongoing">en curso</span></div>
+                <span class="plate bg-go text-white"><span class="size-2 rounded-full bg-white"></span><span i18n="@@today.workingPlate">Trabajando</span></span>
+              </div>
+            }
             @for (log of day.logs; track log.id) {
               <app-log-row [log]="log" [clock]="clock()" [editable]="log.status === 'Pending' || log.status === 'NeedsRevision'" (edit)="openForm(day.key, $event)" />
             } @empty {
-              <p class="py-6 text-ink-2" i18n="@@month.dayEmpty">Sin registros este día.</p>
+              @if (!(day.key === todayKey() && workingSince())) {
+                <p class="py-6 text-ink-2" i18n="@@month.dayEmpty">Sin registros este día.</p>
+              }
             }
           </div>
         } @else {
@@ -103,6 +111,7 @@ export class MonthPage {
   private locale = inject(LOCALE_ID);
 
   private zone = signal('UTC');
+  protected workingSince = signal<string | null>(null);
   protected clock = computed(() => new Clock(this.locale, this.zone()));
   protected year = signal(0);
   protected month = signal(0);
@@ -148,15 +157,18 @@ export class MonthPage {
 
   protected selectedDay = computed(() => this.days().find(d => d.key === this.selected()) ?? null);
 
-  protected totals = computed(() => Object.fromEntries(ORDER.map(s =>
-    [s, duration(this.logs().filter(l => l.status === s).reduce((h, l) => h + hours(l.startAt, l.endAt), 0))])) as Record<WorkLogStatus, string>);
+  protected totalHours = computed(() => Object.fromEntries(ORDER.map(s =>
+    [s, this.logs().filter(l => l.status === s).reduce((h, l) => h + hours(l.startAt, l.endAt), 0)])) as Record<WorkLogStatus, number>);
+  protected totals = computed(() => Object.fromEntries(ORDER.map(s => [s, duration(this.totalHours()[s])])) as Record<WorkLogStatus, string>);
 
   protected totalAll = computed(() => duration(this.logs().filter(l => l.status !== 'Rejected').reduce((h, l) => h + hours(l.startAt, l.endAt), 0)));
 
   constructor() {
     const realtime = inject(Realtime);
     realtime.on(['WorkLogChanged', 'WorkLogStatusChanged', 'PunchChanged'], e => {
-      if (e.payload?.workerId === this.auth.user()?.userId) void this.load();
+      if (e.payload?.workerId !== this.auth.user()?.userId) return;
+      if (e.name === 'PunchChanged') this.workingSince.set(e.payload.workingSince ?? null);
+      void this.load();
     });
     realtime.onResync(() => void this.load());
     void this.init();
@@ -166,6 +178,7 @@ export class MonthPage {
     try {
       const me = await this.api.me();
       this.zone.set(me.user.timeZoneId);
+      this.workingSince.set(me.workingSince);
       const p = this.clock().parts(new Date());
       this.year.set(p.year);
       this.month.set(p.month);

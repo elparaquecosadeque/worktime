@@ -32,7 +32,7 @@ interface NavItem { path: string; label: string; icon: string; }
 
         <span class="plate" [class]="connection().cls" role="status" [attr.title]="connection().label">
           <span class="size-2 rounded-full" [class]="connection().dot"></span>
-          <span class="hidden sm:inline">{{ connection().label }}</span>
+          <span class="sr-only sm:not-sr-only">{{ connection().label }}</span>
         </span>
 
         <a [href]="otherLocale().href" (click)="switchLocale($event)" class="flex items-center gap-1 text-sm font-bold text-ground/80 no-underline hover:text-ground" [attr.lang]="otherLocale().code"

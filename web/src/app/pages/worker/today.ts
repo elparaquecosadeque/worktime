@@ -27,20 +27,16 @@ import { LogRow } from './log-row';
           <app-station-clock [zone]="zone()" class="size-52 shrink-0 sm:size-56 lg:mx-auto lg:size-72" [label]="clockLabel" />
           <div class="flex w-full flex-col gap-3">
             @if (me.workingSince; as since) {
-              <div class="flex items-stretch overflow-hidden rounded-[2px] bg-go text-white">
-                <span class="flex items-center px-3"><span class="size-2.5 rounded-full bg-white motion-safe:animate-pulse"></span></span>
-                <div class="py-2.5 pr-4">
-                  <div class="text-xs font-bold uppercase tracking-[0.08em]" i18n="@@today.workingSince">Trabajando desde {{ clock().time(since) }}</div>
-                  <div class="text-2xl font-extrabold tabular-nums leading-tight">{{ elapsed() }}</div>
-                </div>
+              <div class="flex items-center gap-3 rounded-[2px] bg-go px-4 pb-2.5 pt-3 text-white">
+                <span class="size-2.5 shrink-0 rounded-full bg-white motion-safe:animate-pulse"></span>
+                <span class="text-2xl font-extrabold tabular-nums leading-tight" i18n="@@today.workingSince">Trabajando desde {{ clock().time(since) }}</span>
               </div>
               <button type="button" class="btn btn-stop h-16 text-lg" (click)="punch('out')" [disabled]="busy()">
                 <app-icon name="punch" [size]="22" /><ng-container i18n="@@today.punchOut">Marcar salida</ng-container>
               </button>
             } @else {
               <div class="rounded-[2px] px-4 pb-2.5 pt-3 shadow-[inset_0_0_0_1px_var(--color-rule)]">
-                <div class="text-xs font-bold uppercase tracking-[0.08em] text-ink-2" i18n="@@today.notWorking">Fuera de turno</div>
-                <div class="text-lg font-bold" i18n="@@today.notWorkingHint">Marca tu entrada al empezar.</div>
+                <span class="text-2xl font-extrabold leading-tight" i18n="@@today.notWorking">Fuera de turno</span>
               </div>
               <button type="button" class="btn btn-go h-16 text-lg" (click)="punch('in')" [disabled]="busy()">
                 <app-icon name="punch" [size]="22" /><ng-container i18n="@@today.punchIn">Marcar entrada</ng-container>
@@ -53,15 +49,24 @@ import { LogRow } from './log-row';
         <section aria-labelledby="day-h" class="min-w-0">
           <div class="flex flex-wrap items-end justify-between gap-x-6 gap-y-1">
             <h2 id="day-h" class="text-2xl font-extrabold first-letter:uppercase sm:text-3xl">{{ clock().dayLong(now()) }}</h2>
-            <p class="text-sm text-ink-2"><span class="text-xl font-extrabold text-ink tabular-nums">{{ todayTotal() }}</span> <ng-container i18n="@@today.total">hoy</ng-container></p>
+            <p class="flex items-baseline gap-1.5 text-sm text-ink-2"><span class="text-xl font-extrabold text-ink tabular-nums">{{ todayTotal() }}</span><span i18n="@@today.total">hoy</span></p>
           </div>
           <app-day-track class="mt-4 block" [clock]="clock()" [segments]="segments()" [now]="now()" [label]="trackLabel" />
 
           <div class="mt-6 divide-y divide-rule border-y border-rule">
+            @if (me.workingSince; as since) {
+              <!-- The open shift is today's first row, not an empty state. -->
+              <div class="flex items-center justify-between gap-4 py-3">
+                <div class="text-lg font-bold tabular-nums">{{ clock().time(since) }}–<span class="text-ink-2" i18n="@@today.ongoing">en curso</span></div>
+                <span class="plate bg-go text-white"><span class="size-2 rounded-full bg-white"></span><span i18n="@@today.workingPlate">Trabajando</span></span>
+              </div>
+            }
             @for (log of todayLogs(); track log.id) {
               <app-log-row [log]="log" [clock]="clock()" [editable]="log.status === 'Pending' || log.status === 'NeedsRevision'" (edit)="openForm($event)" />
             } @empty {
-              <p class="py-6 text-ink-2" i18n="@@today.empty">Aún no hay registros hoy. Al marcar salida, tu turno aparece aquí como pendiente de aprobación.</p>
+              @if (!me.workingSince) {
+                <p class="py-6 text-ink-2" i18n="@@today.empty">Aún no hay registros hoy. Al marcar salida, tu turno aparece aquí como pendiente de aprobación.</p>
+              }
             }
           </div>
           <p class="mt-3 text-sm text-ink-2">
@@ -72,9 +77,8 @@ import { LogRow } from './log-row';
 
           <!-- Supervisor sign. -->
           <div class="mt-10">
-            <h2 class="text-sm font-bold uppercase tracking-[0.08em] text-ink-2" i18n="@@today.supervisorHeading">Tu supervisor</h2>
             @if (me.user.supervisorName; as name) {
-              <p class="mt-2 flex items-center gap-2 text-lg font-bold"><app-icon name="person" />{{ name }}</p>
+              <p class="flex items-center gap-2 text-lg"><app-icon name="person" /><span i18n="@@today.supervisorLine">Supervisor: <span class="font-bold">{{ name }}</span></span></p>
             } @else if (me.pendingRequest; as req) {
               <div class="mt-2 rounded-[2px] bg-wait px-4 pb-3 pt-3.5 text-ink">
                 <p class="font-bold" i18n="@@today.requestSent">Sin supervisor · solicitud enviada el {{ clock().stamp(req.createdAt) }}</p>
@@ -142,11 +146,6 @@ export class TodayPage {
     const since = this.me()?.workingSince;
     if (since) s.push({ start: this.clock().dateKey(since) === this.clock().dateKey(this.now()) ? since : this.now().toISOString(), end: null, status: 'Open' });
     return s;
-  });
-
-  protected elapsed = computed(() => {
-    const since = this.me()?.workingSince;
-    return since ? duration(hours(since, this.now().toISOString())) : '';
   });
 
   protected todayTotal = computed(() => {

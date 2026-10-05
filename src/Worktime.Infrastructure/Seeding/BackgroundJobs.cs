@@ -55,15 +55,17 @@ public sealed class DatabaseInitializer(IServiceScopeFactory scopes, IOptions<Se
 }
 
 /// <summary>
-/// Wipes and reseeds the demo every Seed:ResetInterval. Every replica ticks; the advisory lock plus a
-/// "data is still fresh" check make exactly one of them do it per interval.
+/// Wipes and reseeds the demo once the data is Seed:ResetInterval old. Every replica checks periodically;
+/// the advisory lock plus the data-age check make exactly one of them do it, and restarts don't postpone it.
 /// </summary>
 public sealed class DemoResetService(IServiceScopeFactory scopes, IOptions<SeedOptions> options, ILogger<DemoResetService> logger) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken ct)
     {
         if (!options.Value.Enabled) return;
-        using var timer = new PeriodicTimer(options.Value.ResetInterval);
+        // Check at most hourly (PeriodicTimer also rejects periods beyond ~49 days).
+        var check = options.Value.ResetInterval < TimeSpan.FromHours(1) ? options.Value.ResetInterval : TimeSpan.FromHours(1);
+        using var timer = new PeriodicTimer(check);
         while (await timer.WaitForNextTickAsync(ct))
         {
             try
@@ -88,7 +90,7 @@ public sealed class DemoResetService(IServiceScopeFactory scopes, IOptions<SeedO
         {
             if (!await LockKeys.TryXactLockAsync(db, LockKeys.DemoReset, ct)) return false;
             var seededAt = await db.Users.Where(u => u.Email == DemoSeeder.AdminEmail).Select(u => (DateTimeOffset?)u.CreatedAt).FirstOrDefaultAsync(ct);
-            if (seededAt > now - options.Value.ResetInterval / 2) return false; // another replica just did it
+            if (seededAt > now - options.Value.ResetInterval) return false; // still fresh (or another replica just did it)
 
             await DemoSeeder.ClearAsync(db, ct);
             await sp.GetRequiredService<DemoSeeder>().SeedAsync(db, now, ct);

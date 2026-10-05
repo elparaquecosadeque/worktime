@@ -134,6 +134,15 @@ public sealed class ConcurrencyTests(ApiFixture api)
     }
 
     [Fact]
+    public async Task A_worker_reads_their_month_bounded_in_their_time_zone()
+    {
+        var worker = await api.LoginAsync("worker2@worktime.demo");
+        var now = DateTime.UtcNow;
+        var month = await worker.GetFromJsonAsync<JsonElement>($"/api/worklogs/mine?year={now.Year}&month={now.Month}", ApiFixture.Json);
+        Assert.Equal(JsonValueKind.Array, month.ValueKind);
+    }
+
+    [Fact]
     public async Task Endpoints_enforce_permission_claims()
     {
         var worker = await api.LoginAsync("worker1@worktime.demo");

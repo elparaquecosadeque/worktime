@@ -6,8 +6,15 @@
  * Ink on a cool neutral ground. Colour lives only on enamel plates (status, presence),
  * the punch action and the clock's second hand. Plates: flat, 2px corners, uppercase, tracked.
  */
+/* Overpass draws U+00B7 flush right, gluing "a · b" into "a ·b". Borrow only that glyph from the system face. */
+@font-face {
+  font-family: "Separator Dot";
+  src: local("Segoe UI"), local("Helvetica Neue"), local("Arial");
+  unicode-range: U+00B7;
+}
+
 @theme {
-  --font-sans: "Overpass Variable", "Segoe UI", system-ui, sans-serif;
+  --font-sans: "Separator Dot", "Overpass Variable", "Segoe UI", system-ui, sans-serif;
 
   --color-ground: #f2f3f1;
   --color-panel: #e6e8e4;
@@ -73,7 +80,7 @@
     transition: background-color 150ms var(--ease-out-expo), box-shadow 150ms var(--ease-out-expo), transform 150ms var(--ease-out-expo);
     cursor: pointer;
   }
-  .btn:hover:not(:disabled) { background: #000; box-shadow: var(--shadow-lift); }
+  .btn:hover:not(:disabled) { box-shadow: var(--shadow-lift); }
   .btn:active:not(:disabled) { transform: translateY(1px); }
   .btn:disabled { opacity: 0.45; cursor: not-allowed; }
   .btn-quiet { background: transparent; color: var(--color-ink); box-shadow: inset 0 0 0 1px var(--color-rule); }

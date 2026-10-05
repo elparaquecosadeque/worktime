@@ -53,7 +53,7 @@ type Pending = { id: string; kind: 'deactivate' | 'unassign' | 'assign'; supervi
             <div class="truncate text-sm text-ink-2">{{ u.email }} · {{ u.timeZoneId }}</div>
           </div>
           <div class="text-sm">
-            @if (u.role === 'Worker') {
+            @if (u.role === 'Worker' && admin()) {
               @if (u.supervisorName) { <span class="inline-flex items-center gap-1.5"><app-icon name="link" [size]="15" />{{ u.supervisorName }}</span> }
               @else { <span class="plate bg-wait text-ink" i18n="@@team.orphans">Sin supervisor</span> }
             }

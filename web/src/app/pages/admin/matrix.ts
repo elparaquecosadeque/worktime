@@ -33,13 +33,13 @@ function describe(p: string): { name: string; detail: string } {
 
     @if (data(); as m) {
       <div class="mt-6 overflow-x-auto">
-        <table class="w-full min-w-[36rem] border-collapse text-left">
+        <table class="w-full border-collapse text-left">
           <thead>
             <tr class="border-b-2 border-ink">
               <th scope="col" class="py-2 pr-4 text-sm font-bold uppercase tracking-[0.06em] text-ink-2" i18n="@@matrix.permission">Permiso</th>
               @for (r of roles; track r) {
-                <th scope="col" class="w-28 px-2 py-2 text-center text-sm font-bold uppercase tracking-[0.06em]">
-                  {{ roleLabel(r) }}<span class="block text-xs font-semibold normal-case tracking-normal text-ink-3" i18n="@@matrix.people">{{ m.activeUsersByRole[r] ?? 0 }} personas</span>
+                <th scope="col" class="w-16 px-1 py-2 text-center text-[0.6875rem] font-bold uppercase tracking-[0.04em] sm:w-28 sm:px-2 sm:text-sm sm:tracking-[0.06em]">
+                  {{ roleLabel(r) }}<span class="block text-xs font-semibold normal-case tracking-normal text-ink-3" i18n="@@matrix.people">{m.activeUsersByRole[r] ?? 0, plural, =1 {1 persona} other {{{ m.activeUsersByRole[r] ?? 0 }} personas}}</span>
                 </th>
               }
             </tr>
@@ -47,16 +47,17 @@ function describe(p: string): { name: string; detail: string } {
           <tbody>
             @for (p of m.permissions; track p) {
               <tr class="border-b border-rule">
-                <th scope="row" class="py-3 pr-4 font-normal">
+                <th scope="row" class="py-3 pr-2 font-normal sm:pr-4">
                   <span class="block font-bold">{{ describe(p).name }}</span>
                   @if (describe(p).detail) { <span class="block text-sm text-ink-2">{{ describe(p).detail }}</span> }
-                  <code class="text-xs text-ink-3">{{ p }}</code>
+                  <code class="text-xs text-ink-3">{{ p.split(':')[0] }}:<wbr />{{ p.split(':')[1] }}</code>
                 </th>
                 @for (r of roles; track r) {
-                  <td class="px-2 py-3 text-center">
+                  <td class="px-1 py-3 text-center sm:px-2">
                     @if (isLocked(r, p)) {
-                      <span class="inline-flex items-center gap-1 text-ink-2" i18n-title="@@matrix.lockedTitle" title="Bloqueado: el admin nunca pierde este permiso">
-                        <app-icon name="lock" [size]="16" /><span class="sr-only" i18n="@@matrix.locked">Bloqueado</span>
+                      <span class="inline-flex flex-col items-center gap-0.5 text-ink-2" i18n-title="@@matrix.lockedTitle" title="Bloqueado: el admin nunca pierde este permiso">
+                        <app-icon name="check" [size]="20" class="text-ink" /><span class="sr-only">{{ roleLabel(r) }}: {{ describe(p).name }}</span>
+                        <span class="inline-flex items-center gap-0.5 text-[0.6875rem] font-bold uppercase tracking-[0.04em]"><app-icon name="lock" [size]="11" /><ng-container i18n="@@matrix.fixed">Fijo</ng-container></span>
                       </span>
                     } @else {
                       <input type="checkbox" class="size-5 cursor-pointer" [checked]="isOn(r, p)" (change)="toggle(r, p)"
@@ -71,10 +72,10 @@ function describe(p: string): { name: string; detail: string } {
         </table>
       </div>
 
-      <div class="sticky bottom-20 mt-6 flex flex-wrap items-center gap-4 rounded-[2px] px-4 py-3 md:bottom-4"
-        [class]="dirtyRoles().length ? 'bg-ink text-ground shadow-lift' : 'shadow-[inset_0_0_0_1px_var(--color-rule)]'">
+      <div class="mt-6 flex flex-wrap items-center gap-4 rounded-[2px] px-4 py-3"
+        [class]="dirtyRoles().length ? 'sticky bottom-20 md:bottom-4 bg-ink text-ground shadow-lift' : 'shadow-[inset_0_0_0_1px_var(--color-rule)]'">
         @if (dirtyRoles().length) {
-          <p class="flex-1 text-sm font-semibold" i18n="@@matrix.impact">Guardar cerrará la sesión de {{ impact() }} personas para que entren con sus nuevos permisos.</p>
+          <p class="flex-1 text-sm font-semibold" i18n="@@matrix.impact">Guardar cerrará la sesión de {impact(), plural, =1 {1 persona} other {{{ impact() }} personas}} para que entren con sus nuevos permisos.</p>
           <button type="button" class="btn btn-sm !bg-transparent !text-ground underline" (click)="reset()" i18n="@@matrix.discard">Descartar cambios</button>
           <button type="button" class="btn btn-sm !bg-ground !text-ink" (click)="save()" [disabled]="busy()" i18n="@@common.save">Guardar</button>
         } @else {

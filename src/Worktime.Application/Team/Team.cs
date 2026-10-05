@@ -77,11 +77,14 @@ public sealed class TeamSummaryHandler(ITeamReads reads, IPresenceStore presence
             var local = TimeZoneInfo.ConvertTime(now, zone);
             var (from, to) = MyMonthHandler.MonthBounds(local.Year, local.Month, zone);
             var month = logs[w.Id].Where(l => l.StartAt >= from && l.StartAt < to).ToList();
-            double Hours(WorkLogStatus s) => Math.Round(month.Where(l => l.Status == s).Sum(l => (l.EndAt - l.StartAt).TotalHours), 2);
+            static double Hours(IEnumerable<TeamLogRow> rows, WorkLogStatus s) =>
+                Math.Round(rows.Where(l => l.Status == s).Sum(l => (l.EndAt - l.StartAt).TotalHours), 2);
 
             var state = w.WorkingSince is not null ? PresenceState.Working : online.Contains(w.Id) ? PresenceState.Online : PresenceState.Offline;
+            // Approved is a monthly figure; pending hours share the "por decidir" count's scope (everything undecided),
+            // so a card never shows "2 por decidir" next to "0 h pendientes".
             return new TeamMemberDto(w.Id, w.Name, w.TimeZoneId, state, w.WorkingSince,
-                Hours(WorkLogStatus.Approved), Hours(WorkLogStatus.Pending),
+                Hours(month, WorkLogStatus.Approved), Hours(logs[w.Id], WorkLogStatus.Pending),
                 logs[w.Id].Count(l => l.Status == WorkLogStatus.Pending),
                 logs[w.Id].Count(l => l.Status == WorkLogStatus.NeedsRevision));
         }

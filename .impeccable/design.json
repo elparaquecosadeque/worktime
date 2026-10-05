@@ -1,0 +1,467 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-05T20:44:07.593Z",
+  "title": "Design System: Worktime",
+  "extensions": {
+    "colorMeta": {
+      "ground": {
+        "role": "neutral",
+        "displayName": "Cool Ground",
+        "canonical": "#f2f3f1",
+        "tonalRamp": [
+          "oklch(15% 0.003 130)",
+          "oklch(25% 0.003 130)",
+          "oklch(35% 0.003 130)",
+          "oklch(45% 0.003 130)",
+          "oklch(55% 0.003 130)",
+          "oklch(65% 0.003 130)",
+          "oklch(80% 0.003 130)",
+          "oklch(95% 0.003 130)"
+        ]
+      },
+      "panel": {
+        "role": "neutral",
+        "displayName": "Recessed Panel",
+        "canonical": "#e6e8e4",
+        "tonalRamp": [
+          "oklch(15% 0.005 130)",
+          "oklch(25% 0.005 130)",
+          "oklch(35% 0.005 130)",
+          "oklch(45% 0.005 130)",
+          "oklch(55% 0.005 130)",
+          "oklch(65% 0.005 130)",
+          "oklch(80% 0.005 130)",
+          "oklch(95% 0.005 130)"
+        ]
+      },
+      "card": {
+        "role": "neutral",
+        "displayName": "Card Paper",
+        "canonical": "#fbfbfa",
+        "tonalRamp": [
+          "oklch(15% 0.002 110)",
+          "oklch(25% 0.002 110)",
+          "oklch(35% 0.002 110)",
+          "oklch(45% 0.002 110)",
+          "oklch(55% 0.002 110)",
+          "oklch(65% 0.002 110)",
+          "oklch(80% 0.002 110)",
+          "oklch(95% 0.002 110)"
+        ]
+      },
+      "rule": {
+        "role": "neutral",
+        "displayName": "Station Rule",
+        "canonical": "#cbcfca",
+        "tonalRamp": [
+          "oklch(15% 0.007 145)",
+          "oklch(25% 0.007 145)",
+          "oklch(35% 0.007 145)",
+          "oklch(45% 0.007 145)",
+          "oklch(55% 0.007 145)",
+          "oklch(65% 0.007 145)",
+          "oklch(80% 0.007 145)",
+          "oklch(95% 0.007 145)"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Signage Ink",
+        "canonical": "#15181c",
+        "tonalRamp": [
+          "oklch(15% 0.008 258)",
+          "oklch(25% 0.008 258)",
+          "oklch(35% 0.008 258)",
+          "oklch(45% 0.008 258)",
+          "oklch(55% 0.008 258)",
+          "oklch(65% 0.008 258)",
+          "oklch(80% 0.008 258)",
+          "oklch(95% 0.008 258)"
+        ]
+      },
+      "ink-2": {
+        "role": "neutral",
+        "displayName": "Ink Secondary",
+        "canonical": "#4a5059",
+        "tonalRamp": [
+          "oklch(15% 0.018 260)",
+          "oklch(25% 0.018 260)",
+          "oklch(35% 0.018 260)",
+          "oklch(45% 0.018 260)",
+          "oklch(55% 0.018 260)",
+          "oklch(65% 0.018 260)",
+          "oklch(80% 0.018 260)",
+          "oklch(95% 0.018 260)"
+        ]
+      },
+      "ink-3": {
+        "role": "neutral",
+        "displayName": "Ink Tertiary",
+        "canonical": "#6b717a",
+        "tonalRamp": [
+          "oklch(15% 0.016 258)",
+          "oklch(25% 0.016 258)",
+          "oklch(35% 0.016 258)",
+          "oklch(45% 0.016 258)",
+          "oklch(55% 0.016 258)",
+          "oklch(65% 0.016 258)",
+          "oklch(80% 0.016 258)",
+          "oklch(95% 0.016 258)"
+        ]
+      },
+      "sign": {
+        "role": "primary",
+        "displayName": "Information Blue",
+        "canonical": "#0a4c8a",
+        "tonalRamp": [
+          "oklch(15% 0.12 252)",
+          "oklch(25% 0.12 252)",
+          "oklch(35% 0.12 252)",
+          "oklch(45% 0.12 252)",
+          "oklch(55% 0.12 252)",
+          "oklch(65% 0.12 252)",
+          "oklch(80% 0.12 252)",
+          "oklch(95% 0.12 252)"
+        ]
+      },
+      "sign-ink": {
+        "role": "primary",
+        "displayName": "Sign Ink White",
+        "canonical": "#ffffff",
+        "tonalRamp": [
+          "oklch(15% 0 0)",
+          "oklch(25% 0 0)",
+          "oklch(35% 0 0)",
+          "oklch(45% 0 0)",
+          "oklch(55% 0 0)",
+          "oklch(65% 0 0)",
+          "oklch(80% 0 0)",
+          "oklch(95% 0 0)"
+        ]
+      },
+      "go": {
+        "role": "secondary",
+        "displayName": "Signal Green",
+        "canonical": "#1d7a45",
+        "tonalRamp": [
+          "oklch(15% 0.12 152)",
+          "oklch(25% 0.12 152)",
+          "oklch(35% 0.12 152)",
+          "oklch(45% 0.12 152)",
+          "oklch(55% 0.12 152)",
+          "oklch(65% 0.12 152)",
+          "oklch(80% 0.12 152)",
+          "oklch(95% 0.12 152)"
+        ]
+      },
+      "go-deep": {
+        "role": "secondary",
+        "displayName": "Signal Green Deep",
+        "canonical": "#155f35",
+        "tonalRamp": [
+          "oklch(15% 0.12 152)",
+          "oklch(25% 0.12 152)",
+          "oklch(35% 0.12 152)",
+          "oklch(45% 0.12 152)",
+          "oklch(55% 0.12 152)",
+          "oklch(65% 0.12 152)",
+          "oklch(80% 0.12 152)",
+          "oklch(95% 0.12 152)"
+        ]
+      },
+      "wait": {
+        "role": "secondary",
+        "displayName": "Platform Yellow",
+        "canonical": "#f2b400",
+        "tonalRamp": [
+          "oklch(15% 0.165 82)",
+          "oklch(25% 0.165 82)",
+          "oklch(35% 0.165 82)",
+          "oklch(45% 0.165 82)",
+          "oklch(55% 0.165 82)",
+          "oklch(65% 0.165 82)",
+          "oklch(80% 0.165 82)",
+          "oklch(95% 0.165 82)"
+        ]
+      },
+      "back": {
+        "role": "secondary",
+        "displayName": "Return Orange",
+        "canonical": "#d9600f",
+        "tonalRamp": [
+          "oklch(15% 0.175 46)",
+          "oklch(25% 0.175 46)",
+          "oklch(35% 0.175 46)",
+          "oklch(45% 0.175 46)",
+          "oklch(55% 0.175 46)",
+          "oklch(65% 0.175 46)",
+          "oklch(80% 0.175 46)",
+          "oklch(95% 0.175 46)"
+        ]
+      },
+      "stop": {
+        "role": "secondary",
+        "displayName": "Stop Red",
+        "canonical": "#c8102e",
+        "tonalRamp": [
+          "oklch(15% 0.205 22)",
+          "oklch(25% 0.205 22)",
+          "oklch(35% 0.205 22)",
+          "oklch(45% 0.205 22)",
+          "oklch(55% 0.205 22)",
+          "oklch(65% 0.205 22)",
+          "oklch(80% 0.205 22)",
+          "oklch(95% 0.205 22)"
+        ]
+      },
+      "stop-deep": {
+        "role": "secondary",
+        "displayName": "Stop Red Deep",
+        "canonical": "#a00d25",
+        "tonalRamp": [
+          "oklch(15% 0.205 22)",
+          "oklch(25% 0.205 22)",
+          "oklch(35% 0.205 22)",
+          "oklch(45% 0.205 22)",
+          "oklch(55% 0.205 22)",
+          "oklch(65% 0.205 22)",
+          "oklch(80% 0.205 22)",
+          "oklch(95% 0.205 22)"
+        ]
+      },
+      "idle": {
+        "role": "neutral",
+        "displayName": "Idle Grey",
+        "canonical": "#8a9099",
+        "tonalRamp": [
+          "oklch(15% 0.015 258)",
+          "oklch(25% 0.015 258)",
+          "oklch(35% 0.015 258)",
+          "oklch(45% 0.015 258)",
+          "oklch(55% 0.015 258)",
+          "oklch(65% 0.015 258)",
+          "oklch(80% 0.015 258)",
+          "oklch(95% 0.015 258)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Login statement only."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Page titles and the day name on Hoy."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Row time ranges, member names, group and dialog headings, running totals."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Explanations, notes, empty states."
+      },
+      "label": {
+        "displayName": "Plate Label",
+        "purpose": "Plates, total labels, weekday and matrix column headers. Never a standalone kicker."
+      },
+      "field-label": {
+        "displayName": "Field Label",
+        "purpose": "Form field captions, ink-2, sentence case."
+      }
+    },
+    "shadows": [
+      {
+        "name": "lift",
+        "value": "0 1px 2px rgb(21 24 28 / 0.08), 0 4px 12px rgb(21 24 28 / 0.06)",
+        "purpose": "Dialogs, sticky ink action bars, ink button hover. Only for things that float."
+      },
+      {
+        "name": "rule-outline",
+        "value": "inset 0 0 0 1px var(--color-rule)",
+        "purpose": "Outline device for quiet buttons, inputs, empty totals, offline plates, notices."
+      },
+      {
+        "name": "tab-active",
+        "value": "inset 0 -3px 0 var(--color-ground)",
+        "purpose": "Active header tab bar (mobile bottom nav uses inset 0 3px 0 ink)."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-out-expo",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "All 150ms state transitions on buttons, inputs, tabs."
+      },
+      {
+        "name": "second-hand-sweep",
+        "value": "58.5s sweep, rest at 12 until the minute hand jumps",
+        "purpose": "The station clock; the one authored motion. Steps once per second under reduced motion."
+      },
+      {
+        "name": "skeleton",
+        "value": "1.4s linear infinite",
+        "purpose": "Loading shimmer on panel tone."
+      },
+      {
+        "name": "presence-pulse",
+        "value": "animate-pulse, motion-safe only",
+        "purpose": "Working dot and reconnecting dot only."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "sm",
+        "value": "640px"
+      },
+      {
+        "name": "md",
+        "value": "768px"
+      },
+      {
+        "name": "lg",
+        "value": "1024px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Ink button; the default for every decision, including Aprobar.",
+      "html": "<button class=\"ds-btn ds-btn-ink\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"square\" stroke-linejoin=\"miter\" aria-hidden=\"true\"><path d=\"M4.5 12.5l5 5L19.5 7\"/></svg>Aprobar</button>",
+      "css": ".ds-btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;min-height:2.5rem;padding:.5rem 1rem .375rem;border:0;border-radius:2px;font-family:\"Overpass Variable\",\"Segoe UI\",system-ui,sans-serif;font-weight:700;line-height:1;cursor:pointer;transition:background-color 150ms cubic-bezier(.16,1,.3,1),box-shadow 150ms cubic-bezier(.16,1,.3,1),transform 150ms cubic-bezier(.16,1,.3,1)}.ds-btn:focus-visible{outline:3px solid #0a4c8a;outline-offset:2px}.ds-btn:active{transform:translateY(1px)}.ds-btn-ink{background:#15181c;color:#f2f3f1}.ds-btn-ink:hover{background:#000;box-shadow:0 1px 2px rgb(21 24 28 / .08),0 4px 12px rgb(21 24 28 / .06)}"
+    },
+    {
+      "name": "Quiet Button",
+      "kind": "button",
+      "refersTo": "button-quiet",
+      "description": "Rule-outlined secondary choice.",
+      "html": "<button class=\"ds-btn ds-btn-quiet\">Corrección</button>",
+      "css": ".ds-btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;min-height:2.5rem;padding:.5rem 1rem .375rem;border:0;border-radius:2px;font-family:\"Overpass Variable\",\"Segoe UI\",system-ui,sans-serif;font-weight:700;line-height:1;cursor:pointer;transition:background-color 150ms cubic-bezier(.16,1,.3,1),box-shadow 150ms cubic-bezier(.16,1,.3,1),transform 150ms cubic-bezier(.16,1,.3,1)}.ds-btn:focus-visible{outline:3px solid #0a4c8a;outline-offset:2px}.ds-btn:active{transform:translateY(1px)}.ds-btn-quiet{background:transparent;color:#15181c;box-shadow:inset 0 0 0 1px #cbcfca}.ds-btn-quiet:hover{background:#fbfbfa;box-shadow:inset 0 0 0 1px #6b717a}"
+    },
+    {
+      "name": "Punch Button",
+      "kind": "button",
+      "refersTo": "button-stop",
+      "description": "Enamel action: only the punch and destructive confirmations.",
+      "html": "<button class=\"ds-btn ds-btn-punch\"><svg width=\"22\" height=\"22\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"square\" stroke-linejoin=\"miter\" aria-hidden=\"true\"><path d=\"M7 3h10v18H7zM10 7h4M10 11h4M12 15v3\"/></svg>Marcar salida</button>",
+      "css": ".ds-btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;min-height:2.5rem;padding:.5rem 1rem .375rem;border:0;border-radius:2px;font-family:\"Overpass Variable\",\"Segoe UI\",system-ui,sans-serif;font-weight:700;line-height:1;cursor:pointer;transition:background-color 150ms cubic-bezier(.16,1,.3,1),box-shadow 150ms cubic-bezier(.16,1,.3,1),transform 150ms cubic-bezier(.16,1,.3,1)}.ds-btn:focus-visible{outline:3px solid #0a4c8a;outline-offset:2px}.ds-btn:active{transform:translateY(1px)}.ds-btn-punch{background:#c8102e;color:#fff;height:4rem;width:100%;font-size:1.125rem}.ds-btn-punch:hover{background:#a00d25}"
+    },
+    {
+      "name": "Input",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Card field with inset rule stroke; focus thickens to 2px blue.",
+      "html": "<label class=\"ds-field\"><span>Nota para el admin</span><input class=\"ds-input\" placeholder=\"Opcional\"></label>",
+      "css": ".ds-field{display:grid;gap:.375rem;font-family:\"Overpass Variable\",\"Segoe UI\",system-ui,sans-serif;}.ds-field>span{font-size:.8125rem;font-weight:650;color:#4a5059}.ds-input{min-height:2.5rem;padding:.5rem .75rem .375rem;border:0;border-radius:2px;background:#fbfbfa;color:#15181c;font:inherit;box-shadow:inset 0 0 0 1px #cbcfca;transition:box-shadow 150ms cubic-bezier(.16,1,.3,1)}.ds-input:hover{box-shadow:inset 0 0 0 1px #6b717a}.ds-input:focus{outline:none;box-shadow:inset 0 0 0 2px #0a4c8a}.ds-input::placeholder{color:#6b717a}"
+    },
+    {
+      "name": "Status Plates",
+      "kind": "chip",
+      "refersTo": "plate-pending",
+      "description": "Enamel state signs: colour + pictogram + word, never colour alone.",
+      "html": "<span style=\"display:flex;gap:8px;flex-wrap:wrap\"><span class=\"ds-plate\" style=\"background:#f2b400;color:#15181c\"><svg width=\"13\" height=\"13\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"square\" stroke-linejoin=\"miter\" aria-hidden=\"true\"><path d=\"M12 3a9 9 0 1 0 0 18a9 9 0 0 0 0-18M12 7v5l3.5 2\"/></svg>Pendiente</span><span class=\"ds-plate\" style=\"background:#d9600f;color:#fff\"><svg width=\"13\" height=\"13\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"square\" stroke-linejoin=\"miter\" aria-hidden=\"true\"><path d=\"M9 6L4 11l5 5M4.5 11H14a5.5 5.5 0 0 1 0 11h-2\"/></svg>Corrección</span><span class=\"ds-plate\" style=\"background:#1d7a45;color:#fff\"><svg width=\"13\" height=\"13\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"square\" stroke-linejoin=\"miter\" aria-hidden=\"true\"><path d=\"M4.5 12.5l5 5L19.5 7\"/></svg>Aprobado</span><span class=\"ds-plate\" style=\"background:#c8102e;color:#fff\"><svg width=\"13\" height=\"13\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"square\" stroke-linejoin=\"miter\" aria-hidden=\"true\"><path d=\"M6 6l12 12M18 6L6 18\"/></svg>Rechazado</span></span>",
+      "css": ".ds-plate{display:inline-flex;align-items:center;gap:.375rem;padding:.25rem .5rem .125rem;border-radius:2px;font-family:\"Overpass Variable\",\"Segoe UI\",system-ui,sans-serif;font-size:.75rem;font-weight:750;line-height:1.1;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}"
+    },
+    {
+      "name": "Presence Plates",
+      "kind": "chip",
+      "refersTo": "plate-online",
+      "description": "Working, online, offline: dot + word.",
+      "html": "<span style=\"display:flex;gap:8px;flex-wrap:wrap\"><span class=\"ds-plate\" style=\"background:#1d7a45;color:#fff\"><span class=\"ds-dot\" style=\"background:#fff\"></span>Trabajando desde 08:12</span><span class=\"ds-plate\" style=\"background:#0a4c8a;color:#fff\"><span class=\"ds-dot\" style=\"background:#fff\"></span>En línea</span><span class=\"ds-plate\" style=\"color:#4a5059;box-shadow:inset 0 0 0 1px #cbcfca\"><span class=\"ds-dot\" style=\"border:1px solid #8a9099\"></span>Desconectado</span></span>",
+      "css": ".ds-plate{display:inline-flex;align-items:center;gap:.375rem;padding:.25rem .5rem .125rem;border-radius:2px;font-family:\"Overpass Variable\",\"Segoe UI\",system-ui,sans-serif;font-size:.75rem;font-weight:750;line-height:1.1;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}.ds-dot{width:.5rem;height:.5rem;border-radius:999px;box-sizing:border-box}"
+    },
+    {
+      "name": "Header Band",
+      "kind": "nav",
+      "refersTo": "header-band",
+      "description": "Ink band with wordmark and signed tabs; the active tab carries a 3px ground bar.",
+      "html": "<nav class=\"ds-band\"><strong class=\"ds-word\">Worktime</strong><a class=\"ds-tab is-active\" href=\"#\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"square\" stroke-linejoin=\"miter\" aria-hidden=\"true\"><path d=\"M12 3a9 9 0 1 0 0 18a9 9 0 0 0 0-18M12 7v5l3.5 2\"/></svg>Hoy</a><a class=\"ds-tab\" href=\"#\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"square\" stroke-linejoin=\"miter\" aria-hidden=\"true\"><path d=\"M4 6h16v14H4zM4 10h16M8 3v4M16 3v4\"/></svg>Mes</a></nav>",
+      "css": ".ds-band{display:flex;align-items:stretch;gap:1rem;height:3.5rem;padding:0 1.5rem;background:#15181c;color:#f2f3f1;font-family:\"Overpass Variable\",\"Segoe UI\",system-ui,sans-serif;}.ds-word{align-self:center;font-size:1.125rem;font-weight:800;letter-spacing:-.015em}.ds-tab{display:flex;align-items:center;gap:.5rem;padding:0 .875rem;font-weight:700;font-size:.9375rem;color:rgb(242 243 241 / .72);text-decoration:none;box-shadow:inset 0 -3px 0 transparent;transition:color 150ms cubic-bezier(.16,1,.3,1),box-shadow 150ms cubic-bezier(.16,1,.3,1)}.ds-tab:hover{color:#f2f3f1}.ds-tab.is-active{color:#f2f3f1;box-shadow:inset 0 -3px 0 #f2f3f1}.ds-tab:focus-visible{outline:3px solid #0a4c8a;outline-offset:2px}"
+    },
+    {
+      "name": "Signed Row",
+      "kind": "custom",
+      "refersTo": "plate-approved",
+      "description": "Rule-divided log row; the open shift is today's first row.",
+      "html": "<div class=\"ds-rows\"><div class=\"ds-row\"><b>08:12–<span style=\"color:#4a5059\">en curso</span></b><span class=\"ds-plate\" style=\"background:#1d7a45;color:#fff\">Trabajando</span></div><div class=\"ds-row\"><b>06:00–07:30</b><span class=\"ds-plate\" style=\"background:#f2b400;color:#15181c\"><svg width=\"13\" height=\"13\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"square\" stroke-linejoin=\"miter\" aria-hidden=\"true\"><path d=\"M12 3a9 9 0 1 0 0 18a9 9 0 0 0 0-18M12 7v5l3.5 2\"/></svg>Pendiente</span></div></div>",
+      "css": ".ds-plate{display:inline-flex;align-items:center;gap:.375rem;padding:.25rem .5rem .125rem;border-radius:2px;font-family:\"Overpass Variable\",\"Segoe UI\",system-ui,sans-serif;font-size:.75rem;font-weight:750;line-height:1.1;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}.ds-rows{border-top:1px solid #cbcfca;border-bottom:1px solid #cbcfca;font-family:\"Overpass Variable\",\"Segoe UI\",system-ui,sans-serif;font-variant-numeric:tabular-nums}.ds-row{display:flex;justify-content:space-between;align-items:center;gap:1rem;padding:.75rem 0;font-size:1.125rem;color:#15181c}.ds-row+.ds-row{border-top:1px solid #cbcfca}"
+    },
+    {
+      "name": "Day Track",
+      "kind": "custom",
+      "refersTo": "plate-approved",
+      "description": "00–24 h bed; each log is as wide as its duration; red now-line; open shift hatched.",
+      "html": "<div class=\"ds-track\"><span class=\"ds-seg\" style=\"left:25%;width:6.25%;background:#f2b400\"></span><span class=\"ds-seg ds-open\" style=\"left:34%;width:12%;background:#1d7a45\"></span><span class=\"ds-now\" style=\"left:46%\"></span></div>",
+      "css": ".ds-track{position:relative;height:2.5rem;border-radius:2px;background:#e6e8e4;background-image:repeating-linear-gradient(90deg,transparent 0 calc(12.5% - 1px),#cbcfca calc(12.5% - 1px) 12.5%)}.ds-seg{position:absolute;top:6px;bottom:6px;border-radius:2px}.ds-open{background-image:repeating-linear-gradient(135deg,transparent 0 5px,rgb(255 255 255 / .35) 5px 9px)}.ds-now{position:absolute;top:-4px;bottom:-4px;width:2px;background:#c8102e}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Station Board",
+    "overview": "Worktime is built like a railway station's wayfinding programme (the SBB / Aicher lineage): one system, legible at ten metres, never ambiguous. Ink sits on a cool, slightly grey ground; thin rules frame zones the way a departures board frames its rows. Colour is not decoration. It is reserved for flat enamel plates that announce a state, and for the few actions that change one.\n\nDensity is moderate and calm. Screens are rows, rules and plates, not cards in a dashboard grid. Numbers are always tabular so times line up like a timetable. The one piece of authored motion is the station clock's red second hand, which sweeps the dial in 58.5 seconds and rests at twelve until the minute hand jumps. Time is drawn as length: a log on the day track is exactly as wide as the time it covers.\n\nThe system rejects the category's default look: sidebar, KPI cards, indigo tables.",
+    "keyCharacteristics": [
+      "Ink on cool ground, 1px rules as the main structural device.",
+      "Colour only on enamel plates, the punch action, destructive confirmations and the clock's second hand.",
+      "Plates: flat, 2px corners, uppercase, tracked, always pictogram or dot plus word.",
+      "Overpass (Highway Gothic lineage) at heavy weights, tabular lining numerals everywhere.",
+      "Authored 2px square-cap pictograms on a 24-unit grid.",
+      "Duration is length; the open shift is a signed row, not an empty state."
+    ],
+    "rules": [
+      {
+        "name": "The Enamel Rule",
+        "body": "State colour lives only on plates. Buttons that decide (Aprobar) are ink; only the punch action and destructive confirmations take enamel. A plate is never painted for emphasis.",
+        "section": "colors"
+      },
+      {
+        "name": "The Zero Is Outlined Rule",
+        "body": "A total, plate or status with nothing in it is drawn as a 1px rule outline in ink-3, not as an enamel fill. Colour means something is there.",
+        "section": "colors"
+      },
+      {
+        "name": "The Yellow Carries Ink Rule",
+        "body": "Platform Yellow always takes ink text; white on yellow is never used.",
+        "section": "colors"
+      },
+      {
+        "name": "The Timetable Rule",
+        "body": "Every number that is a time, duration or count is tabular. Times are written start–end with an en dash.",
+        "section": "typography"
+      },
+      {
+        "name": "The Labelled Once Rule",
+        "body": "Nothing is labelled twice. A heading is not preceded by an eyebrow, a plate is not followed by the same word in prose, an icon does not repeat its label.",
+        "section": "typography"
+      },
+      {
+        "name": "The Flat Board Rule",
+        "body": "Surfaces at rest have no shadow. Lift only for things that genuinely float over content.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do put state colour only on plates, the punch action, destructive confirmations and the clock's second hand.",
+      "Do pair every plate's colour with a pictogram or dot and a word; colour alone never carries state.",
+      "Do make decision buttons ink (Aprobar is ink, not green).",
+      "Do draw empty or zero totals as a 1px rule outline in ink-3.",
+      "Do draw time as length: a duration on a track is exactly as wide as the time it covers.",
+      "Do show the open shift as a signed row (\"08:12–en curso\" + Trabajando plate).",
+      "Do separate content with 1px rules and rows; use the ink-underlined heading for groups.",
+      "Do keep all numerals tabular and write ranges with an en dash.",
+      "Do use the authored 2px square-cap pictograms; add new ones on the same 24-unit grid."
+    ],
+    "donts": [
+      "Don't use eyebrow or kicker labels above headings; the heading is the sign.",
+      "Don't label anything twice (plate plus matching prose, icon plus duplicate tooltip text, eyebrow plus heading).",
+      "Don't put white text on Platform Yellow.",
+      "Don't use rounded corners beyond 2px on plates and controls (4px is for dialogs only), and don't make pills.",
+      "Don't add shadows to resting surfaces; Lift is for things that float.",
+      "Don't build dashboards from KPI cards, sidebars or indigo tables.",
+      "Don't use Information Blue for state, or state enamels for navigation.",
+      "Don't use icon fonts or emoji as pictograms."
+    ]
+  }
+}

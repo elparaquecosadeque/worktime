@@ -130,15 +130,17 @@ dotnet test tests/Worktime.IntegrationTests     # requiere Docker (Testcontainer
 
 ## Memoria aproximada
 
-| Componente | RAM |
+Medido con `docker stats` con el stack en reposo después del seed:
+
+| Componente | RAM medida |
 |---|---|
-| Docker Desktop (VM de WSL2, en reposo) | ~1.0–1.5 GB |
-| Postgres (`mem_limit` 256 MB) | ~60–100 MB |
-| Redis (`maxmemory` 64 MB) | ~10–20 MB |
-| API × 2 (workstation GC, `mem_limit` 320 MB) | ~150–200 MB c/u |
-| nginx | ~10 MB |
-| **Stack del compose** | **~0.4–0.55 GB** |
-| **Total con Docker Desktop** | **~1.5–2 GB** |
+| api-1 / api-2 (workstation GC, `mem_limit` 320 MB) | ~110 MB / ~105 MB |
+| Postgres (`mem_limit` 256 MB) | ~44 MB |
+| nginx | ~15 MB |
+| Redis (`maxmemory` 64 MB) | ~6 MB |
+| **Stack del compose** | **~280 MB** |
+| Docker Desktop (VM de WSL2, en reposo) | ~1.0–1.5 GB (estimado) |
+| **Total con Docker Desktop** | **~1.3–1.8 GB** |
 
 Para limitar la VM, crea `%UserProfile%\.wslconfig` con `[wsl2]` y `memory=4GB`.
 
