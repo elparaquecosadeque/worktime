@@ -1,0 +1,61 @@
+# docker compose up --build   →   http://localhost:8080
+#
+# postgres ─┐
+# redis ────┼── api-1 ─┐
+#           └── api-2 ─┴── nginx (balancer + Angular /es/ /en/) ── :8080
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: worktime
+      POSTGRES_USER: worktime
+      POSTGRES_PASSWORD: worktime
+    volumes: [pgdata:/var/lib/postgresql/data]
+    ports: ["5432:5432"] # handy for psql / dotnet run outside compose
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U worktime -d worktime"]
+      interval: 5s
+      retries: 10
+    mem_limit: 256m
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--save", "", "--appendonly", "no", "--maxmemory", "64mb", "--maxmemory-policy", "allkeys-lru"]
+    ports: ["6379:6379"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      retries: 10
+    mem_limit: 96m
+
+  api-1: &api
+    build: { context: ., dockerfile: Dockerfile }
+    image: worktime-api
+    environment: &api-env
+      ConnectionStrings__Postgres: Host=postgres;Database=worktime;Username=worktime;Password=worktime
+      ConnectionStrings__Redis: redis:6379,abortConnect=false
+      # Same key on every replica so any replica validates any token. Override in real deployments.
+      Jwt__SigningKey: ${JWT_SIGNING_KEY:-compose-demo-signing-key-change-me-0123456789abcdef}
+      Seed__Enabled: "true"
+      Seed__ResetInterval: ${SEED_RESET_INTERVAL:-24:00:00}
+      Cache__TeamSummarySeconds: ${TEAM_SUMMARY_CACHE_SECONDS:-5}
+      Diagnostics__SlowRequestMs: "500"
+      Cors__Origins__0: http://localhost:4200
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+    mem_limit: 320m
+
+  api-2:
+    <<: *api # same image; the build is cached after api-1
+
+  nginx:
+    build: { context: ./web }
+    ports: ["8080:80"]
+    depends_on:
+      api-1: { condition: service_healthy }
+      api-2: { condition: service_healthy }
+    mem_limit: 32m
+
+volumes:
+  pgdata:

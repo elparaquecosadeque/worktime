@@ -1,0 +1,129 @@
+{
+  "title": "Worktime: elige el mundo visual",
+  "question": "El sorteo asignó «Señalética de estación». Quédate con ella, toma una alternativa o vuelve a sortear.",
+  "options": [
+    {
+      "id": "assigned",
+      "label": "Señalética de estación",
+      "kicker": "EL SORTEO",
+      "lineage": "Programas de señalización ferroviaria suizos y alemanes (SBB, Otl Aicher)",
+      "thesis": "Cada estado es un letrero: se lee a diez metros, nunca se confunde y sigue un solo sistema en todas las pantallas.",
+      "palette": ["#F4F4F1", "#16181B", "#E2001A", "#0B5FA5", "#F5B700", "#1F8A4C"],
+      "materials": ["Placas esmaltadas planas con esquinas de 2 px", "Grotesca de señalética con numerales tabulares", "Pictogramas propios de trazo 2 px"],
+      "viewport": "Pantalla Hoy: un reloj de estación grande a la izquierda con el cronómetro del punch y la placa «TRABAJANDO DESDE 08:12»; a la derecha, el andén del día con sus registros como letreros de estado.",
+      "risk": "Si los colores de señal se reparten por toda la pantalla, se vuelve ruidosa; solo las placas de estado llevan color.",
+      "raised": [
+        { "from": "challenger-labanotation", "raise": "La duración es longitud: en la línea de tiempo del día, cada registro mide exactamente sus horas." },
+        { "from": "challenger-lexicon", "raise": "Encabezado de rango: las listas largas muestran arriba el primer y el último elemento visibles («1–15 oct · 23 pendientes»)." },
+        { "from": "challenger-catalog", "raise": "El equipo se reacomoda en celdas enteras, y cada trabajador lleva siempre los mismos datos en el mismo lugar." },
+        { "from": "challenger-saville", "raise": "Nada se etiqueta dos veces: el estado vive en la placa, no también en un texto al lado." }
+      ]
+    },
+    {
+      "id": "model-pick",
+      "label": "Tiras de control aéreo",
+      "kicker": "MI OPCIÓN",
+      "lineage": "Flight progress strips de las torres de control",
+      "thesis": "Cada registro es una tira física que solo un controlador sostiene a la vez y que pasa de bahía en bahía.",
+      "palette": ["#E9E6DC", "#22252A", "#F2C230", "#3E7BC4", "#D2463A"],
+      "materials": ["Tiras de cartón en portatiras", "Bahías ranuradas", "Anotaciones a mano en grasa"],
+      "viewport": "Bandeja del supervisor: bahías verticales (Pendiente, En revisión, Decididos) con las tiras de registro deslizables, y el equipo como una bahía de vuelos activos.",
+      "risk": "Es la metáfora que más rinde para la concurrencia, pero en el móvil del trabajador las tiras se aprietan.",
+      "case": "Encaja con la concurrencia: una tira solo la tiene un controlador a la vez, y entregarla es el 409."
+    },
+    {
+      "id": "challenger-splitflap",
+      "label": "Tablero split-flap",
+      "verdict": "competitive",
+      "lineage": "Tableros de salidas de las estaciones",
+      "thesis": "La presencia del equipo como un tablero de salidas que cambia letra por letra.",
+      "palette": ["#111111", "#F2F2F2", "#F2A900", "#B3261E", "#6B6E73"],
+      "materials": ["Paletas mate negras", "Marco de acero cepillado", "Lámparas ámbar por fila"],
+      "viewport": "Equipo en vivo: filas por trabajador con estado, desde y horas, y las paletas cascadeando cuando alguien marca.",
+      "case": "Mantiene la claridad del producto en la presencia en vivo, pero el calendario y los formularios no tienen equivalente en el tablero.",
+      "risk": "Fuera del equipo en vivo (calendario, matriz, formularios) el tablero se vuelve un disfraz.",
+      "hero": "https://impeccable.style/worlds/cards/signals-instruments-split-flap-concourse-hero.webp"
+    },
+    {
+      "id": "challenger-labanotation",
+      "label": "Partitura Labanotation",
+      "verdict": "declined",
+      "lineage": "Notación de danza",
+      "thesis": "El tiempo sube por una pauta y la longitud de cada bloque es la duración exacta.",
+      "palette": ["#FFFFFF", "#111111", "#D9D9D9"],
+      "materials": ["Papel de partitura", "Bloques sombreados"],
+      "viewport": "Un mes como pauta vertical de bloques.",
+      "risk": "Ilegible para quien no lee notación.",
+      "case": "Se pierde en los dos ejes: nadie del equipo reconoce una partitura de danza.",
+      "kept": "La duración es longitud exacta.",
+      "hero": "https://impeccable.style/worlds/cards/notation-diagram-systems-labanotation-hero.webp"
+    },
+    {
+      "id": "challenger-lexicon",
+      "label": "Página de lexicón",
+      "verdict": "declined",
+      "lineage": "Diccionarios del siglo XIX",
+      "thesis": "Entradas jerarquizadas por su aparato y palabras guía que nombran el rango visible.",
+      "palette": ["#F1EAD8", "#111111", "#C8361E"],
+      "materials": ["Papel crema", "Láminas a color con marco"],
+      "viewport": "La bandeja como una columna de entradas.",
+      "risk": "Cae en el crema más serif por defecto.",
+      "case": "Se pierde en los dos ejes: la herramienta es operativa, no de lectura.",
+      "kept": "Las palabras guía del rango visible.",
+      "hero": "https://impeccable.style/worlds/cards/rw-lexicon-shoulder-and-plate-hero.webp"
+    },
+    {
+      "id": "challenger-catalog",
+      "label": "Catálogo de personajes",
+      "verdict": "declined",
+      "lineage": "Catálogos de mascotas de merchandising",
+      "thesis": "Un elenco en grilla, cada uno con su placa y sus datos fijos.",
+      "palette": ["#FCE4EC", "#E3F2FD", "#FFFFFF", "#FF7A00"],
+      "materials": ["Pasteles planos", "Contorno blanco"],
+      "viewport": "El equipo como elenco.",
+      "risk": "Infantiliza una herramienta de nómina.",
+      "case": "Se pierde en los dos ejes: el tono no corresponde a aprobar horas.",
+      "kept": "Celdas enteras con los mismos datos fijos por persona.",
+      "hero": "https://impeccable.style/worlds/cards/pop-culture-shelf-character-goods-catalog-hero.webp"
+    },
+    {
+      "id": "challenger-saville",
+      "label": "Funda de catálogo industrial",
+      "verdict": "declined",
+      "lineage": "Identidad Factory Records",
+      "thesis": "Todo es una entrada codificada y nada se etiqueta dos veces.",
+      "palette": ["#0A0A0A", "#FFFFFF", "#E4002B", "#00A3E0"],
+      "materials": ["Negro mate", "Trazos blancos"],
+      "viewport": "Índice numerado de registros.",
+      "risk": "Codificar los nombres con color esconde el estado.",
+      "case": "Se pierde en los dos ejes: esconder etiquetas contradice el principio de estado inequívoco.",
+      "kept": "Nada se etiqueta dos veces.",
+      "hero": "https://impeccable.style/worlds/cards/brand-identity-canon-saville-catalog-sleeve-hero.webp"
+    },
+    {
+      "id": "challenger-annual",
+      "label": "Anuario de diseño",
+      "verdict": "declined",
+      "lineage": "Secciones de láminas de anuarios",
+      "thesis": "Una hoja casi blanca con marcas de registro y un sello que firma.",
+      "palette": ["#F5F4F6", "#16181A", "#DCDDF3"],
+      "materials": ["Papel sin estucar", "Cruces de registro"],
+      "viewport": "Registros como láminas.",
+      "risk": "Es decoración editorial sobre una herramienta.",
+      "case": "Se pierde en los dos ejes; se queda en la tirada del sorteo.",
+      "kept": "Retícula de filetes de 1 px sin excepciones.",
+      "hero": "https://impeccable.style/worlds/cards/design-annual-s-plate-section-hero.webp"
+    }
+  ],
+  "reroll": { "registers": ["safer", "bolder"] },
+  "canon": true,
+  "canonCard": {
+    "label": "El estándar de la categoría",
+    "thesis": "El SaaS de time tracking tal como lo hacen Harvest o Linear, ejecutado con oficio.",
+    "palette": ["#FFFFFF", "#111827", "#6366F1", "#F3F4F6"],
+    "materials": ["Sidebar y tarjetas KPI", "Tablas de datos"],
+    "viewport": "Un sidebar, una fila de KPIs y una tabla de registros.",
+    "risk": "Indistinguible de cualquier dashboard, por diseño."
+  },
+  "steer": true
+}
