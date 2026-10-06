@@ -3,15 +3,21 @@
 # postgres ─┐
 # redis ────┼── api-1 ─┐
 #           └── api-2 ─┴── nginx (balancer + Angular /es/ /en/) ── :8080
+#
+# Same file locally and on the server (Jenkins deploys it with WORKTIME_TAG=<build>-<sha>; see Jenkinsfile).
+name: worktime
+
 services:
   postgres:
     image: postgres:16-alpine
+    restart: unless-stopped
     environment:
       POSTGRES_DB: worktime
       POSTGRES_USER: worktime
-      POSTGRES_PASSWORD: worktime
+      # Only applied when the volume is first created; changing it later needs ALTER USER.
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-worktime}
     volumes: [pgdata:/var/lib/postgresql/data]
-    ports: ["5432:5432"] # handy for psql / dotnet run outside compose
+    ports: ["127.0.0.1:${POSTGRES_PORT:-5432}:5432"] # host-only (psql / dotnet run); never exposed to the LAN
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U worktime -d worktime"]
       interval: 5s
@@ -20,8 +26,9 @@ services:
 
   redis:
     image: redis:7-alpine
+    restart: unless-stopped
     command: ["redis-server", "--save", "", "--appendonly", "no", "--maxmemory", "64mb", "--maxmemory-policy", "allkeys-lru"]
-    ports: ["6379:6379"]
+    ports: ["127.0.0.1:${REDIS_PORT:-6379}:6379"]
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
@@ -30,13 +37,14 @@ services:
 
   api-1: &api
     build: { context: ., dockerfile: Dockerfile }
-    image: worktime-api
-    environment: &api-env
-      ConnectionStrings__Postgres: Host=postgres;Database=worktime;Username=worktime;Password=worktime
+    image: worktime-api:${WORKTIME_TAG:-latest}
+    restart: unless-stopped
+    environment:
+      ConnectionStrings__Postgres: Host=postgres;Database=worktime;Username=worktime;Password=${POSTGRES_PASSWORD:-worktime}
       ConnectionStrings__Redis: redis:6379,abortConnect=false
       # Same key on every replica so any replica validates any token. Override in real deployments.
       Jwt__SigningKey: ${JWT_SIGNING_KEY:-compose-demo-signing-key-change-me-0123456789abcdef}
-      Seed__Enabled: "true"
+      Seed__Enabled: ${SEED_ENABLED:-true}
       Seed__ResetInterval: ${SEED_RESET_INTERVAL:-24:00:00}
       Cache__TeamSummarySeconds: ${TEAM_SUMMARY_CACHE_SECONDS:-5}
       Diagnostics__SlowRequestMs: "500"
@@ -51,7 +59,9 @@ services:
 
   nginx:
     build: { context: ./web }
-    ports: ["8080:80"]
+    image: worktime-web:${WORKTIME_TAG:-latest}
+    restart: unless-stopped
+    ports: ["${WORKTIME_PORT:-8080}:80"]
     depends_on:
       api-1: { condition: service_healthy }
       api-2: { condition: service_healthy }

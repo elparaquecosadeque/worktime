@@ -48,7 +48,17 @@ cd web && npm start                       # http://localhost:4200, proxy /api y 
 | `Jwt:SigningKey` | (dev) | Clave HMAC compartida por todas las réplicas |
 | `Jwt:LifetimeHours` | `8` | Duración del token (una jornada) |
 
-En compose: `SEED_RESET_INTERVAL`, `TEAM_SUMMARY_CACHE_SECONDS` y `JWT_SIGNING_KEY`.
+En compose: `SEED_RESET_INTERVAL`, `TEAM_SUMMARY_CACHE_SECONDS`, `JWT_SIGNING_KEY` y `POSTGRES_PASSWORD`. Si los puertos chocan con servicios locales, cámbialos con `WORKTIME_PORT` (8080), `POSTGRES_PORT` (5432) y `REDIS_PORT` (6379). Postgres y Redis se publican solo en `127.0.0.1`.
+
+## Deploy continuo (Jenkins)
+
+El `Jenkinsfile` de este repo lo ejecuta el Jenkins self-hosted del repo hermano [`jenkins-local`](../jenkins-local), que hace polling de `main` cada 2 minutos:
+
+1. **Tests:** los 47, incluidos los de integración con Testcontainers, en un contenedor del SDK.
+2. **Imágenes y release:** `worktime-api:<build>-<sha>` y `worktime-web:<build>-<sha>`, más un *release* con el `docker-compose.yml` y el script de esa versión.
+3. **Deploy rolling** ([`deploy/rolling-deploy.sh`](deploy/rolling-deploy.sh)): actualiza api-1, espera a que esté healthy, sigue con api-2 y luego nginx. nginx re-resuelve el DNS de las réplicas (`resolve`) y salta en 2 s a la otra si una no responde.
+4. **Smoke test** por nginx.
+5. **Rollback automático** si algo falla, a la última versión buena, **con su configuración**. Para rollback manual: *Build with Parameters* → `DEPLOY_TAG`.
 
 ## Arquitectura
 
