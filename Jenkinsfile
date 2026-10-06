@@ -73,7 +73,7 @@ pipeline {
         sh 'WORKTIME_TAG="$TAG" docker compose build --pull || WORKTIME_TAG="$TAG" docker compose build'
         sh '''
           mkdir -p "$RELEASES/$TAG"
-          cp docker-compose.yml deploy/rolling-deploy.sh "$RELEASES/$TAG/"
+          cp docker-compose.yml docker-compose.server.yml deploy/rolling-deploy.sh "$RELEASES/$TAG/"
           git log -1 --format='%H %an: %s' > "$RELEASES/$TAG/commit.txt"
         '''
       }
@@ -86,6 +86,8 @@ pipeline {
           string(credentialsId: 'worktime-jwt-key', variable: 'JWT_SIGNING_KEY'),
           string(credentialsId: 'worktime-postgres-password', variable: 'POSTGRES_PASSWORD'),
         ]) {
+          // Role + database in jenkins-local's shared Postgres (idempotent; EF migrations do the rest).
+          sh 'DB_PASSWORD="$POSTGRES_PASSWORD" ensure-db worktime worktime'
           sh 'COMPOSE_FILE_PATH="$RELEASES/$TAG/docker-compose.yml" bash "$RELEASES/$TAG/rolling-deploy.sh" "$TAG"'
         }
       }

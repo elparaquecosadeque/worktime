@@ -56,7 +56,7 @@ El `Jenkinsfile` de este repo lo ejecuta el Jenkins self-hosted del repo hermano
 
 1. **Tests:** los 47, incluidos los de integración con Testcontainers, en un contenedor del SDK.
 2. **Imágenes y release:** `worktime-api:<build>-<sha>` y `worktime-web:<build>-<sha>`, más un *release* con el `docker-compose.yml` y el script de esa versión.
-3. **Deploy rolling** ([`deploy/rolling-deploy.sh`](deploy/rolling-deploy.sh)): actualiza api-1, espera a que esté healthy, sigue con api-2 y luego nginx. nginx re-resuelve el DNS de las réplicas (`resolve`) y salta en 2 s a la otra si una no responde.
+3. **Deploy rolling** ([`deploy/rolling-deploy.sh`](deploy/rolling-deploy.sh)), con [`docker-compose.server.yml`](docker-compose.server.yml) encima: en el servidor Postgres es el compartido de jenkins-local, no el de este compose. actualiza api-1, espera a que esté healthy, sigue con api-2 y luego nginx. nginx re-resuelve el DNS de las réplicas (`resolve`) y salta en 2 s a la otra si una no responde.
 4. **Smoke test** por nginx.
 5. **Rollback automático** si algo falla, a la última versión buena, **con su configuración**. Para rollback manual: *Build with Parameters* → `DEPLOY_TAG`.
 

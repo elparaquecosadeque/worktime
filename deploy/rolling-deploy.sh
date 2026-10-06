@@ -12,7 +12,8 @@ KEEP_IMAGES="${KEEP_IMAGES:-5}"
 COMPOSE_FILE_PATH="${COMPOSE_FILE_PATH:-$(dirname "$0")/../docker-compose.yml}"
 export WORKTIME_TAG="$TAG"
 
-compose() { docker compose -f "$COMPOSE_FILE_PATH" "$@"; }
+# Server overrides (shared Postgres) live next to the compose file, in the release as in the repo.
+compose() { docker compose -f "$COMPOSE_FILE_PATH" -f "$(dirname "$COMPOSE_FILE_PATH")/docker-compose.server.yml" "$@"; }
 
 wait_healthy() {
   local svc="$1" id status
@@ -28,8 +29,7 @@ wait_healthy() {
 }
 
 echo "==> Deploying worktime $TAG"
-compose up -d --no-build postgres redis
-wait_healthy postgres
+compose up -d --no-build redis
 wait_healthy redis
 
 # One replica at a time: while api-1 restarts (and migrates, under an advisory lock), api-2 keeps serving.

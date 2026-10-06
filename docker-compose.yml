@@ -4,7 +4,8 @@
 # redis ────┼── api-1 ─┐
 #           └── api-2 ─┴── nginx (balancer + Angular /es/ /en/) ── :8080
 #
-# Same file locally and on the server (Jenkins deploys it with WORKTIME_TAG=<build>-<sha>; see Jenkinsfile).
+# Same file locally and on the server (Jenkins deploys it with WORKTIME_TAG=<build>-<sha>; see Jenkinsfile),
+# where docker-compose.server.yml swaps this postgres for jenkins-local's shared one.
 name: worktime
 
 services:
@@ -61,7 +62,7 @@ services:
     build: { context: ./web }
     image: worktime-web:${WORKTIME_TAG:-latest}
     restart: unless-stopped
-    ports: ["${WORKTIME_PORT:-8080}:80"]
+    ports: ["127.0.0.1:${WORKTIME_PORT:-8080}:80"] # host-only; on the server the public side is cloudflared
     depends_on:
       api-1: { condition: service_healthy }
       api-2: { condition: service_healthy }
