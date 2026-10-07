@@ -1,0 +1,19 @@
+# Server overrides (jenkins-local), applied by deploy/rolling-deploy.sh on top of docker-compose.yml.
+# Postgres is jenkins-local's shared instance (host shared-postgres, external network shared-db), where the
+# Jenkinsfile creates the worktime role and database. This project's own postgres is never started there.
+services:
+  postgres:
+    profiles: [standalone]
+
+  api-1: &api
+    environment:
+      ConnectionStrings__Postgres: Host=shared-postgres;Database=worktime;Username=worktime;Password=${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
+    depends_on: !override
+      redis: { condition: service_healthy }
+    networks: [default, shared-db]
+
+  api-2: *api
+
+networks:
+  shared-db:
+    external: true
