@@ -1,12 +1,12 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
 using StackExchange.Redis;
 using Worktime.Application.Auth.Interfaces;
 using Worktime.Application.Common.Interfaces;
 using Worktime.Application.Team;
 using Worktime.Infrastructure.Assignments;
+using Worktime.Infrastructure.BackgroundJobs;
 using Worktime.Infrastructure.Permissions;
 using Worktime.Infrastructure.Persistence;
 using Worktime.Infrastructure.Punch;
@@ -61,25 +61,4 @@ public static class DependencyInjection
         .AddWorkLogsModule()
         .AddAssignmentsModule()
         .AddTeamModule();
-}
-
-internal sealed class SystemClock : IClock
-{
-    public DateTimeOffset UtcNow => DateTimeOffset.UtcNow;
-}
-
-internal sealed class RedisHealthCheck(IConnectionMultiplexer redis) : IHealthCheck
-{
-    public async Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken ct = default)
-    {
-        try
-        {
-            var latency = await redis.GetDatabase().PingAsync();
-            return HealthCheckResult.Healthy($"ping {latency.TotalMilliseconds:0.0}ms");
-        }
-        catch (Exception ex)
-        {
-            return HealthCheckResult.Unhealthy("redis unreachable", ex);
-        }
-    }
 }

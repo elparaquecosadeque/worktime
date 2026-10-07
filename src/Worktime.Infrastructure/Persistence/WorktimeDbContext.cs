@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Design;
 using Worktime.Domain.Assignments;
 using Worktime.Domain.Common;
 using Worktime.Domain.Permissions;
@@ -35,14 +34,4 @@ public sealed class WorktimeDbContext(DbContextOptions<WorktimeDbContext> option
         foreach (var type in b.Model.GetEntityTypes().Where(t => typeof(Entity).IsAssignableFrom(t.ClrType)))
             b.Entity(type.ClrType).Ignore(nameof(Entity.DomainEvents));
     }
-}
-
-/// <summary>Lets <c>dotnet ef migrations add</c> build the model without the host.</summary>
-public sealed class DesignTimeFactory : IDesignTimeDbContextFactory<WorktimeDbContext>
-{
-    public WorktimeDbContext CreateDbContext(string[] args) =>
-        new(new DbContextOptionsBuilder<WorktimeDbContext>()
-            .UseNpgsql("Host=localhost;Database=worktime;Username=worktime;Password=worktime")
-            .UseSnakeCaseNamingConvention()
-            .Options);
 }
