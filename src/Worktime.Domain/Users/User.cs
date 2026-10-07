@@ -1,13 +1,7 @@
 using Worktime.Domain.Common;
+using Worktime.Domain.Users.Events;
 
 namespace Worktime.Domain.Users;
-
-public enum Role { Worker, Supervisor, Admin }
-
-public sealed record WorkerAssigned(Guid WorkerId, Guid SupervisorId) : IDomainEvent;
-public sealed record WorkerUnassigned(Guid WorkerId, Guid PreviousSupervisorId) : IDomainEvent;
-/// <summary>Any stamp change must reach the stamp store; <see cref="Reason"/> non-null also kicks live sessions.</summary>
-public sealed record UserStampChanged(Guid UserId, string Stamp, string? Reason) : IDomainEvent;
 
 public sealed class User : Entity
 {

@@ -1,6 +1,6 @@
-namespace Worktime.Domain.Common;
+using Worktime.Domain.Common.Interfaces;
 
-public interface IDomainEvent;
+namespace Worktime.Domain.Common;
 
 public abstract class Entity
 {

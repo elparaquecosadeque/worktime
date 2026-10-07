@@ -1,11 +1,11 @@
 using Microsoft.Extensions.Logging;
 using Worktime.Application.Presence;
 using Worktime.Application.Users;
-using Worktime.Domain.Assignments;
-using Worktime.Domain.Common;
-using Worktime.Domain.Punch;
-using Worktime.Domain.Users;
-using Worktime.Domain.WorkLogs;
+using Worktime.Domain.Assignments.Events;
+using Worktime.Domain.Common.Interfaces;
+using Worktime.Domain.Punch.Events;
+using Worktime.Domain.Users.Events;
+using Worktime.Domain.WorkLogs.Events;
 
 namespace Worktime.Application.Common;
 

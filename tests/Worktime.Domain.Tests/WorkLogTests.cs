@@ -1,5 +1,6 @@
 using Worktime.Domain.Common;
 using Worktime.Domain.WorkLogs;
+using Worktime.Domain.WorkLogs.Events;
 
 namespace Worktime.Domain.Tests;
 

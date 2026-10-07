@@ -1,32 +1,7 @@
 using Worktime.Domain.Common;
+using Worktime.Domain.WorkLogs.Events;
 
 namespace Worktime.Domain.WorkLogs;
-
-public enum WorkLogStatus { Pending, NeedsRevision, Approved, Rejected }
-public enum WorkLogSource { Punch, Manual }
-public enum Decision { Approve, RequestRevision, Reject }
-
-public sealed record WorkLogSubmitted(Guid WorkLogId, Guid WorkerId) : IDomainEvent;
-public sealed record WorkLogEdited(Guid WorkLogId, Guid WorkerId) : IDomainEvent;
-public sealed record WorkLogStatusChanged(Guid WorkLogId, Guid WorkerId, WorkLogStatus Status, Guid ActorId, string? Reason) : IDomainEvent;
-
-public sealed class WorkLogEvent
-{
-    private WorkLogEvent() { } // EF
-
-    internal WorkLogEvent(Guid workLogId, Guid actorId, DateTimeOffset at, WorkLogStatus? from, WorkLogStatus to, string? reason)
-    {
-        WorkLogId = workLogId; ActorId = actorId; At = at; From = from; To = to; Reason = reason;
-    }
-
-    public Guid Id { get; private set; } = Guid.NewGuid();
-    public Guid WorkLogId { get; private set; }
-    public Guid ActorId { get; private set; }
-    public DateTimeOffset At { get; private set; }
-    public WorkLogStatus? From { get; private set; }
-    public WorkLogStatus To { get; private set; }
-    public string? Reason { get; private set; }
-}
 
 public sealed class WorkLog : Entity
 {

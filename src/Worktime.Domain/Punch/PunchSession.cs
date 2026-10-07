@@ -1,10 +1,8 @@
 using Worktime.Domain.Common;
+using Worktime.Domain.Punch.Events;
 using Worktime.Domain.WorkLogs;
 
 namespace Worktime.Domain.Punch;
-
-public sealed record PunchStarted(Guid WorkerId, DateTimeOffset At) : IDomainEvent;
-public sealed record PunchEnded(Guid WorkerId, DateTimeOffset At, IReadOnlyList<Guid> WorkLogIds) : IDomainEvent;
 
 public sealed class PunchSession : Entity
 {

@@ -2,7 +2,9 @@ using Worktime.Domain.Assignments;
 using Worktime.Domain.Common;
 using Worktime.Domain.Permissions;
 using Worktime.Domain.Punch;
+using Worktime.Domain.Punch.Events;
 using Worktime.Domain.Users;
+using Worktime.Domain.Users.Events;
 using Worktime.Domain.WorkLogs;
 
 namespace Worktime.Domain.Tests;

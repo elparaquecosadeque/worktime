@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using Worktime.Application.Common;
 using Worktime.Domain.Common;
+using Worktime.Domain.Common.Interfaces;
 
 namespace Worktime.Infrastructure.Persistence;
 

@@ -1,12 +1,8 @@
+using Worktime.Domain.Assignments.Events;
 using Worktime.Domain.Common;
 using Worktime.Domain.Users;
 
 namespace Worktime.Domain.Assignments;
-
-public enum AssignmentStatus { Pending, Fulfilled, Dismissed }
-
-public sealed record AssignmentRequested(Guid RequestId, Guid WorkerId) : IDomainEvent;
-public sealed record AssignmentResolved(Guid RequestId, Guid WorkerId, AssignmentStatus Status, string? Reason) : IDomainEvent;
 
 public sealed class AssignmentRequest : Entity
 {

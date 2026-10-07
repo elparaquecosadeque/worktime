@@ -1,4 +1,4 @@
-using Worktime.Domain.Common;
+using Worktime.Domain.Common.Interfaces;
 using Worktime.Domain.Users;
 
 namespace Worktime.Application.Common;
