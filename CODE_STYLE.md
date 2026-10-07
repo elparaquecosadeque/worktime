@@ -5,7 +5,7 @@ El código se lee muchas más veces de las que se escribe. Preferimos archivos c
 ## Un tipo por archivo
 
 - Cada tipo top-level (clase, record, interfaz, enum) va en **su propio archivo**, con el mismo nombre que el tipo: `WorkLogDto` → `WorkLogDto.cs`. Si es genérico, el archivo no lleva los parámetros: `ValidationBehavior<,>` → `ValidationBehavior.cs`.
-- **Excepción:** un command o query comparte archivo con su handler (`CreateManualWorkLogCommand.cs` contiene el record y `CreateManualWorkLogHandler`). *(Pendiente de revisión: puede que se separen.)*
+- **Excepción:** un command o query comparte archivo con su handler (`CreateManualWorkLogCommand.cs` contiene el record y `CreateManualWorkLogHandler`). El record es una línea y casi siempre se lee junto a su handler.
 - Los tipos **anidados** pequeños pueden quedarse en el archivo de su tipo contenedor. Por ejemplo, los request records de cada controller (`AuthController.LoginRequest`) son el contrato privado de ese controller.
 
 ## Carpetas por feature
