@@ -4,6 +4,7 @@ using System.Text;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Worktime.Application.Common;
+using Worktime.Application.Common.Interfaces;
 using Worktime.Domain.Users;
 
 namespace Worktime.Api.Auth;

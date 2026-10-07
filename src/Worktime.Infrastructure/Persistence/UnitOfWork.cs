@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using Worktime.Application.Common;
+using Worktime.Application.Common.Interfaces;
 using Worktime.Domain.Common;
 using Worktime.Domain.Common.Interfaces;
 

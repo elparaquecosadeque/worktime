@@ -1,8 +1,9 @@
 using Bogus;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using Worktime.Application.Auth;
-using Worktime.Application.Common;
+using Worktime.Application.Auth.Interfaces;
+using Worktime.Application.Auth.Results;
+using Worktime.Application.Common.Interfaces;
 using Worktime.Domain.Assignments;
 using Worktime.Domain.Permissions;
 using Worktime.Domain.Punch;

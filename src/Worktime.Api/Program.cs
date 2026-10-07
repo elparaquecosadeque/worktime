@@ -11,6 +11,7 @@ using Worktime.Api.Middleware;
 using Worktime.Api.Realtime;
 using Worktime.Application;
 using Worktime.Application.Common;
+using Worktime.Application.Common.Interfaces;
 using Worktime.Infrastructure;
 using Worktime.Infrastructure.Redis;
 

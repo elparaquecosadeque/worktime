@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.Extensions.DependencyInjection;
-using Worktime.Application.Punch;
+using Worktime.Application.Punch.Interfaces;
 using Worktime.Domain.Punch;
 using Worktime.Domain.Users;
 using Worktime.Infrastructure.Persistence;

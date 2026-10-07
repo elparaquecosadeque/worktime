@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
+using Worktime.Application.Common.Interfaces;
 using Worktime.Application.Presence;
-using Worktime.Application.Users;
+using Worktime.Application.Users.Interfaces;
 using Worktime.Domain.Assignments.Events;
 using Worktime.Domain.Common.Interfaces;
 using Worktime.Domain.Punch.Events;

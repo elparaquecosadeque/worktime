@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Worktime.Application.Common;
+using Worktime.Application.Common.Interfaces;
 using Worktime.Application.Presence;
 using Worktime.Application.Users;
 using Worktime.Application.WorkLogs;

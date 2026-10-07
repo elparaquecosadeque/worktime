@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Worktime.Application.Team;
+using Worktime.Application.Team.Interfaces;
+using Worktime.Application.Team.Results;
 using Worktime.Domain.Users;
 using Worktime.Infrastructure.Persistence;
 

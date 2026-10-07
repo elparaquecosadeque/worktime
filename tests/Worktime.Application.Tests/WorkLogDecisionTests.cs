@@ -2,8 +2,12 @@ using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 using Worktime.Application.Common;
-using Worktime.Application.Users;
+using Worktime.Application.Common.Interfaces;
+using Worktime.Application.Users.Interfaces;
 using Worktime.Application.WorkLogs;
+using Worktime.Application.WorkLogs.Commands;
+using Worktime.Application.WorkLogs.Interfaces;
+using Worktime.Application.WorkLogs.Results;
 using Worktime.Domain.Users;
 using Worktime.Domain.WorkLogs;
 

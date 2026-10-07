@@ -1,6 +1,7 @@
 using System.Diagnostics.Metrics;
 using NSubstitute;
 using Worktime.Application.Common;
+using Worktime.Application.Common.Interfaces;
 using Worktime.Domain.Permissions;
 using Worktime.Domain.Users;
 using Worktime.Domain.WorkLogs;

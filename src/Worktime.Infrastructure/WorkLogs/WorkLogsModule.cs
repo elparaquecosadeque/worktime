@@ -1,7 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.Extensions.DependencyInjection;
-using Worktime.Application.WorkLogs;
+using Worktime.Application.WorkLogs.Interfaces;
+using Worktime.Application.WorkLogs.Results;
 using Worktime.Domain.Users;
 using Worktime.Domain.WorkLogs;
 using Worktime.Infrastructure.Persistence;

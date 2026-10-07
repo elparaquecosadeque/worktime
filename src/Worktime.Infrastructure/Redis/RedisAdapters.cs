@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
 using StackExchange.Redis;
-using Worktime.Application.Common;
+using Worktime.Application.Common.Interfaces;
 using Worktime.Infrastructure.Persistence;
 
 namespace Worktime.Infrastructure.Redis;

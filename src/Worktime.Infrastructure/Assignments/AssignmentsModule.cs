@@ -1,7 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.Extensions.DependencyInjection;
-using Worktime.Application.Assignments;
+using Worktime.Application.Assignments.Interfaces;
+using Worktime.Application.Assignments.Results;
 using Worktime.Domain.Assignments;
 using Worktime.Domain.Users;
 using Worktime.Infrastructure.Persistence;
