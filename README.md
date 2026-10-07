@@ -7,6 +7,7 @@ Tres roles: el **trabajador** marca entrada y salida y corrige sus registros con
 - Spec completo: [`docs/spec.md`](docs/spec.md)
 - Diagrama: [`docs/architecture.excalidraw`](docs/architecture.excalidraw) (ábrelo en <https://excalidraw.com>)
 - Producto y sistema visual: [`PRODUCT.md`](PRODUCT.md) y [`DESIGN.md`](DESIGN.md)
+- Estilo de código (backend): [`CODE_STYLE.md`](CODE_STYLE.md)
 
 ## Levantarlo
 
