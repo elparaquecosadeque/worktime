@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Testcontainers.PostgreSql;
 using Testcontainers.Redis;
+using Worktime.Api;
 
 namespace Worktime.IntegrationTests;
 
