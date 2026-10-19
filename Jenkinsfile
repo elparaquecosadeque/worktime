@@ -6,6 +6,10 @@
 // rolling back restores the old images AND the old compose config.
 //
 // A failed deploy rolls back to the last tag that went live. "Build with Parameters" + DEPLOY_TAG = manual rollback.
+//
+// READS_ADAPTER (EF Core or Dapper behind the I*Reads ports) is an operational switch, not version config: the
+// last value that went live is kept in deploy-state and reused by every deploy and rollback until someone changes
+// it. Switching with no downtime: DEPLOY_TAG = the live tag + READS_ADAPTER = Dapper → rolling restart, no build.
 pipeline {
   agent any
 
@@ -19,11 +23,14 @@ pipeline {
   parameters {
     string(name: 'DEPLOY_TAG', defaultValue: '',
       description: 'Vacío: probar, construir y desplegar este commit. Un tag existente (p. ej. 12-a1b2c3d): rollback a esa versión sin construir.')
+    choice(name: 'READS_ADAPTER', choices: ['mantener', 'Ef', 'Dapper'],
+      description: 'Lecturas con EF Core o Dapper. "mantener": el último que quedó en producción (Ef si nunca se eligió).')
   }
 
   environment {
     RELEASES = "${JENKINS_HOME}/deploy-state/worktime"
     LAST_GOOD = "${JENKINS_HOME}/deploy-state/worktime/last-good"
+    READS_STATE = "${JENKINS_HOME}/deploy-state/worktime/reads-adapter"
     KEEP_RELEASES = '5'
   }
 
@@ -34,11 +41,14 @@ pipeline {
           env.ROLLBACK_ONLY = params.DEPLOY_TAG?.trim() ? 'true' : 'false'
           env.TAG = env.ROLLBACK_ONLY == 'true' ? params.DEPLOY_TAG.trim() : "${env.BUILD_NUMBER}-${env.GIT_COMMIT.take(7)}"
           currentBuild.displayName = "#${env.BUILD_NUMBER} · ${env.TAG}${env.ROLLBACK_ONLY == 'true' ? ' (rollback)' : ''}"
+          // Read by docker-compose.yml (Persistence__Reads) and checked per replica by rolling-deploy.sh.
+          env.PERSISTENCE_READS = params.READS_ADAPTER != 'mantener' ? params.READS_ADAPTER : liveReadsAdapter()
         }
         sh '''
           mkdir -p "$RELEASES"
           echo "Versión en producción: $(cat "$LAST_GOOD" 2>/dev/null || echo ninguna)"
-          echo "Releases disponibles para rollback: $(ls -1t "$RELEASES" | grep -v last-good | tr '\\n' ' ')"
+          echo "Lecturas: $(cat "$READS_STATE" 2>/dev/null || echo Ef) en producción → $PERSISTENCE_READS en este deploy"
+          echo "Releases disponibles para rollback: $(ls -1t "$RELEASES" | grep -vx -e last-good -e reads-adapter | tr '\\n' ' ')"
           if [ "$ROLLBACK_ONLY" = true ] && [ ! -f "$RELEASES/$TAG/docker-compose.yml" ]; then
             echo "No existe el release $TAG. Usa uno de la lista de arriba." >&2; exit 1
           fi
@@ -98,11 +108,12 @@ pipeline {
     success {
       sh '''
         echo "$TAG" > "$LAST_GOOD"
+        echo "$PERSISTENCE_READS" > "$READS_STATE"
         # Keep the newest releases (and always the live one); their images are pruned by the deploy script.
-        ls -1t "$RELEASES" | grep -v last-good | tail -n +"$((KEEP_RELEASES + 1))" | grep -vx "$TAG" \
+        ls -1t "$RELEASES" | grep -vx -e last-good -e reads-adapter | tail -n +"$((KEEP_RELEASES + 1))" | grep -vx "$TAG" \
           | xargs -r -I{} rm -rf "$RELEASES/{}"
       '''
-      script { currentBuild.description = "En producción: ${env.TAG}" }
+      script { currentBuild.description = "En producción: ${env.TAG} · reads: ${env.PERSISTENCE_READS}" }
     }
     failure {
       script {
@@ -112,17 +123,19 @@ pipeline {
         }
         if (env.DEPLOY_STARTED == 'true') {
           def previous = sh(script: 'cat "$LAST_GOOD" 2>/dev/null || true', returnStdout: true).trim()
-          if (previous && previous != env.TAG) {
-            echo "Deploy de ${env.TAG} falló: volviendo a ${previous} (imágenes y configuración de ese release)"
+          def previousReads = liveReadsAdapter()
+          // Same tag but another adapter (a switch-only deploy) also left replicas half-changed: restore it too.
+          if (previous && (previous != env.TAG || previousReads != env.PERSISTENCE_READS)) {
+            echo "Deploy de ${env.TAG} (reads: ${env.PERSISTENCE_READS}) falló: volviendo a ${previous} (reads: ${previousReads})"
             withCredentials([
               string(credentialsId: 'worktime-jwt-key', variable: 'JWT_SIGNING_KEY'),
               string(credentialsId: 'worktime-postgres-password', variable: 'POSTGRES_PASSWORD'),
             ]) {
-              withEnv(["PREVIOUS=${previous}"]) {
+              withEnv(["PREVIOUS=${previous}", "PERSISTENCE_READS=${previousReads}"]) {
                 sh 'COMPOSE_FILE_PATH="$RELEASES/$PREVIOUS/docker-compose.yml" bash "$RELEASES/$PREVIOUS/rolling-deploy.sh" "$PREVIOUS"'
               }
             }
-            currentBuild.description = "Falló; se restauró ${previous}"
+            currentBuild.description = "Falló; se restauró ${previous} · reads: ${previousReads}"
           } else {
             echo 'No hay una versión buena previa a la que volver.'
           }
@@ -133,4 +146,9 @@ pipeline {
       sh 'docker image prune -f >/dev/null || true'
     }
   }
+}
+
+/** The reads adapter of the last deploy that went live; Ef before anyone ever picked one. */
+def liveReadsAdapter() {
+  return sh(script: 'cat "$READS_STATE" 2>/dev/null || echo Ef', returnStdout: true).trim()
 }

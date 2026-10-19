@@ -46,20 +46,23 @@ cd web && npm start                       # http://localhost:4200, proxy /api y 
 | `Seed:ResetInterval` | `24:00:00` | Cada cuánto se borra y se vuelve a sembrar la demo |
 | `Cache:TeamSummarySeconds` | `5` | TTL del resumen de equipo en Redis |
 | `Diagnostics:SlowRequestMs` | `500` | Umbral del warning de request lenta |
+| `Diagnostics:ExposeReadsAdapter` | `false` | `/health` también dice qué adaptador de lecturas corre (solo local: compose y `dotnet run`) |
+| `Persistence:Reads` | `Ef` | `Ef` o `Dapper`: quién implementa las lecturas (ver [Lecturas: EF Core o Dapper](#lecturas-ef-core-o-dapper)) |
 | `Jwt:SigningKey` | (dev) | Clave HMAC compartida por todas las réplicas |
 | `Jwt:LifetimeHours` | `8` | Duración del token (una jornada) |
 
-En compose: `SEED_RESET_INTERVAL`, `TEAM_SUMMARY_CACHE_SECONDS`, `JWT_SIGNING_KEY` y `POSTGRES_PASSWORD`. Si los puertos chocan con servicios locales, cámbialos con `WORKTIME_PORT` (8080), `POSTGRES_PORT` (5432) y `REDIS_PORT` (6379). Postgres y Redis se publican solo en `127.0.0.1`.
+En compose: `SEED_RESET_INTERVAL`, `TEAM_SUMMARY_CACHE_SECONDS`, `JWT_SIGNING_KEY`, `POSTGRES_PASSWORD` y `PERSISTENCE_READS`. Si los puertos chocan con servicios locales, cámbialos con `WORKTIME_PORT` (8080), `POSTGRES_PORT` (5432) y `REDIS_PORT` (6379). Postgres y Redis se publican solo en `127.0.0.1`.
 
 ## Deploy continuo (Jenkins)
 
 El `Jenkinsfile` de este repo lo ejecuta el Jenkins self-hosted del repo hermano [`jenkins-local`](../jenkins-local), que hace polling de `main` cada 2 minutos:
 
-1. **Tests:** los 47, incluidos los de integración con Testcontainers, en un contenedor del SDK.
+1. **Tests:** los 51, incluidos los de integración con Testcontainers, en un contenedor del SDK.
 2. **Imágenes y release:** `worktime-api:<build>-<sha>` y `worktime-web:<build>-<sha>`, más un *release* con el `docker-compose.yml` y el script de esa versión.
 3. **Deploy rolling** ([`deploy/rolling-deploy.sh`](deploy/rolling-deploy.sh)), con [`docker-compose.server.yml`](docker-compose.server.yml) encima: en el servidor Postgres es el compartido de jenkins-local, no el de este compose. actualiza api-1, espera a que esté healthy, sigue con api-2 y luego nginx. nginx re-resuelve el DNS de las réplicas (`resolve`) y salta en 2 s a la otra si una no responde.
 4. **Smoke test** por nginx.
 5. **Rollback automático** si algo falla, a la última versión buena, **con su configuración**. Para rollback manual: *Build with Parameters* → `DEPLOY_TAG`.
+6. **Adaptador de lecturas** (`READS_ADAPTER`): `mantener`, `Ef` o `Dapper`. El último que quedó en producción se guarda en `deploy-state` y lo reutilizan los deploys y rollbacks siguientes. El script confirma en el log de arranque de cada réplica que corre el adaptador pedido; si no, el deploy falla y vuelve al anterior. La descripción del build lo muestra: `En producción: <tag> · reads: Dapper`.
 
 ## Arquitectura
 
@@ -67,7 +70,7 @@ El `Jenkinsfile` de este repo lo ejecuta el Jenkins self-hosted del repo hermano
 src/
   Worktime.Domain          agregados e invariantes, sin dependencias
   Worktime.Application     casos de uso (CQRS con Mediator), puertos
-  Worktime.Infrastructure  EF Core/Npgsql, Redis, seeder (Bogus), jobs
+  Worktime.Infrastructure  EF Core/Npgsql, Dapper (lecturas, opcional), Redis, seeder (Bogus), jobs
   Worktime.Api             controllers, hub, middleware, JWT
 tests/
   Worktime.Domain.Tests        puros, sin mocks
@@ -81,6 +84,23 @@ Es un **monolito modular**: los proyectos van por capa y las carpetas por módul
 **CQRS ligero:** los commands pasan por los agregados; las queries proyectan directo a DTOs con `AsNoTracking`. Se usa [Mediator](https://github.com/martinothamar/Mediator) (source generator, MIT) en lugar de MediatR, que desde la v13 tiene licencia comercial. Los behaviors (`LoggingBehavior` y `ValidationBehavior`) cubren lo transversal de cada caso de uso.
 
 **Eventos de dominio → tiempo real:** los agregados acumulan eventos, el `UnitOfWork` los despacha **después del commit**, y `RealtimeEventDispatcher` los traduce a mensajes de SignalR. Ningún cliente se entera de un cambio que se revirtió.
+
+### Lecturas: EF Core o Dapper
+
+Las queries leen a través de puertos (`IWorkLogReads`, `IUserReads`, `ITeamReads`, `IAssignmentReads`), y cada uno tiene dos adaptadores: `EfWorkLogReads` (LINQ) y `DapperWorkLogReads` (SQL escrito a mano). `Persistence:Reads` elige uno al arrancar; Application no se entera del cambio. **Las escrituras son siempre EF**, porque el change tracking, el `xmin` y la salida de eventos de dominio dependen de él.
+
+- Dapper usa la conexión del `DbContext`: mismo pool, y dentro de una transacción ve los cambios aún no confirmados.
+- El historial de cada registro sale en una segunda consulta (`WHERE work_log_id = ANY(@ids)`): sin N+1 y sin filas duplicadas por el JOIN.
+- `ReadsEquivalenceTests` llama cada lectura con los dos adaptadores sobre los mismos datos y compara el JSON. Todo `ORDER BY` termina en `id`, para que el orden sea determinista en ambos.
+
+Cambiarlo:
+
+```bash
+PERSISTENCE_READS=Dapper docker compose up -d   # local
+curl http://localhost:8080/health                # {"status":"Healthy","reads":"Dapper"}
+```
+
+En el servidor: *Build with Parameters* → `DEPLOY_TAG` = el tag en producción y `READS_ADAPTER` = `Dapper`. Es un rolling restart sin build y sin downtime (las dos réplicas pasan una por una).
 
 ## Doble aprobación: defensa en capas
 
@@ -123,7 +143,7 @@ ForwardedHeaders → ExceptionHandler (ProblemDetails + code) → CorrelationId 
 
 - Los logs son JSON por consola con el `CorrelationId` en cada línea, y hay un warning sobre `SlowRequestMs`.
 - Métricas nativas (`System.Diagnostics.Metrics`, meter `Worktime`): `http.server.request.duration_ms`, `worklogs.decisions`, `worklogs.concurrency_conflicts` y `signalr.connections`. Para verlas: `docker compose exec api-1 dotnet-counters monitor -n Worktime.Api --counters Worktime` (con dotnet-counters instalado).
-- `/health` verifica Postgres y Redis.
+- `/health` verifica Postgres y Redis. Con `Diagnostics:ExposeReadsAdapter` (solo local) responde JSON con el adaptador de lecturas.
 
 ## Datos de demo
 

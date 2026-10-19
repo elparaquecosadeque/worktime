@@ -11,6 +11,8 @@ TAG="${1:?usage: rolling-deploy.sh <tag>}"
 KEEP_IMAGES="${KEEP_IMAGES:-5}"
 COMPOSE_FILE_PATH="${COMPOSE_FILE_PATH:-$(dirname "$0")/../docker-compose.yml}"
 export WORKTIME_TAG="$TAG"
+# Ef | Dapper behind the read ports (docker-compose.yml: Persistence__Reads). Jenkins passes the live/requested one.
+export PERSISTENCE_READS="${PERSISTENCE_READS:-Ef}"
 
 # Server overrides (shared Postgres) live next to the compose file, in the release as in the repo.
 compose() { docker compose -f "$COMPOSE_FILE_PATH" -f "$(dirname "$COMPOSE_FILE_PATH")/docker-compose.server.yml" "$@"; }
@@ -28,7 +30,18 @@ wait_healthy() {
   return 1
 }
 
-echo "==> Deploying worktime $TAG"
+# A healthy replica is not enough: it must have started with the requested adapter (it logs it on startup).
+check_reads_adapter() {
+  local svc="$1"
+  if docker logs "$(compose ps -q "$svc")" 2>&1 | grep -qE "Reads adapter: ${PERSISTENCE_READS}\b"; then
+    echo "  $svc reads: $PERSISTENCE_READS"
+  else
+    echo "  $svc did not start with the $PERSISTENCE_READS reads adapter" >&2
+    return 1
+  fi
+}
+
+echo "==> Deploying worktime $TAG (reads: $PERSISTENCE_READS)"
 compose up -d --no-build redis
 wait_healthy redis
 
@@ -37,6 +50,7 @@ for svc in api-1 api-2; do
   echo "--> $svc"
   compose up -d --no-build --no-deps "$svc"
   wait_healthy "$svc"
+  check_reads_adapter "$svc"
 done
 
 echo "--> nginx"

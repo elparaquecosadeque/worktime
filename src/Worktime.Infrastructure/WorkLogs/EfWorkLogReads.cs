@@ -7,15 +7,15 @@ using Worktime.Infrastructure.Persistence;
 
 namespace Worktime.Infrastructure.WorkLogs;
 
-internal sealed class WorkLogReads(WorktimeDbContext db) : IWorkLogReads
+internal sealed class EfWorkLogReads(WorktimeDbContext db) : IWorkLogReads
 {
     private IQueryable<WorkLogDto> Project(IQueryable<WorkLog> logs) =>
         from l in logs
         join w in db.Users on l.WorkerId equals w.Id
-        orderby l.StartAt
+        orderby l.StartAt, l.Id
         select new WorkLogDto(
             l.Id, l.WorkerId, w.Name, w.TimeZoneId, l.StartAt, l.EndAt, l.Source, l.Note, l.Status,
-            l.History.OrderBy(h => h.At).Select(h => new WorkLogEventDto(
+            l.History.OrderBy(h => h.At).ThenBy(h => h.Id).Select(h => new WorkLogEventDto(
                 h.At, h.ActorId, db.Users.Where(a => a.Id == h.ActorId).Select(a => a.Name).First(), h.From, h.To, h.Reason)).ToList());
 
     public async Task<IReadOnlyList<WorkLogDto>> ListForWorkerAsync(Guid workerId, DateTimeOffset fromUtc, DateTimeOffset toUtc, CancellationToken ct) =>
