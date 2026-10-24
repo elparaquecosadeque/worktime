@@ -30,6 +30,7 @@ public static class DependencyInjection
         services.AddSingleton<IConnectionMultiplexer>(_ => ConnectionMultiplexer.Connect(config.GetConnectionString("Redis")!));
         services.AddMemoryCache();
 
+        services.Configure<PersistenceOptions>(config.GetSection(PersistenceOptions.Section));
         services.Configure<SeedOptions>(config.GetSection(SeedOptions.Section));
         services.Configure<CacheOptions>(config.GetSection(CacheOptions.Section));
 
@@ -53,12 +54,16 @@ public static class DependencyInjection
         return services;
     }
 
-    public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration config) => services
-        .AddSharedKernel(config)
-        .AddUsersModule()
-        .AddPermissionsModule()
-        .AddPunchModule()
-        .AddWorkLogsModule()
-        .AddAssignmentsModule()
-        .AddTeamModule();
+    public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration config)
+    {
+        var reads = (config.GetSection(PersistenceOptions.Section).Get<PersistenceOptions>() ?? new PersistenceOptions()).Reads;
+        return services
+            .AddSharedKernel(config)
+            .AddUsersModule(reads)
+            .AddPermissionsModule()
+            .AddPunchModule()
+            .AddWorkLogsModule(reads)
+            .AddAssignmentsModule(reads)
+            .AddTeamModule(reads);
+    }
 }

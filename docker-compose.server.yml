@@ -8,6 +8,7 @@ services:
   api-1: &api
     environment:
       ConnectionStrings__Postgres: Host=shared-postgres;Database=worktime;Username=worktime;Password=${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
+      Diagnostics__ExposeReadsAdapter: "false" # public /health stays plain; rolling-deploy.sh checks the adapter in the logs
     depends_on: !override
       redis: { condition: service_healthy }
     networks: [default, shared-db]

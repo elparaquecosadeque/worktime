@@ -2,8 +2,10 @@ using System.Text.Json.Serialization;
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Worktime.Api.Auth;
 using Worktime.Api.Middleware;
@@ -12,6 +14,7 @@ using Worktime.Application;
 using Worktime.Application.Common;
 using Worktime.Application.Common.Interfaces;
 using Worktime.Infrastructure;
+using Worktime.Infrastructure.Persistence;
 using Worktime.Infrastructure.Redis;
 
 namespace Worktime.Api;
@@ -29,6 +32,8 @@ public class Program // not static: WebApplicationFactory<Program> needs it as a
         AddWeb(builder.Services, builder.Configuration);
 
         var app = builder.Build();
+        // rolling-deploy.sh greps this line to confirm each replica runs the requested adapter.
+        app.Logger.LogInformation("Reads adapter: {ReadsAdapter}", ReadsAdapterOf(app));
         UsePipeline(app);
         MapEndpoints(app);
         app.Run();
@@ -132,6 +137,20 @@ public class Program // not static: WebApplicationFactory<Program> needs it as a
     {
         app.MapControllers();
         app.MapHub<WorktimeHub>(WorktimeHub.Path);
-        app.MapHealthChecks("/health");
+        app.MapHealthChecks("/health", HealthOptions(app));
     }
+
+    /// <summary>Plain "Healthy" as always; with Diagnostics:ExposeReadsAdapter (local/dev) a JSON body that also names the reads adapter.</summary>
+    private static HealthCheckOptions HealthOptions(WebApplication app)
+    {
+        if (!app.Services.GetRequiredService<IOptions<DiagnosticsOptions>>().Value.ExposeReadsAdapter) return new HealthCheckOptions();
+        var reads = ReadsAdapterOf(app).ToString();
+        return new HealthCheckOptions
+        {
+            ResponseWriter = (ctx, report) => ctx.Response.WriteAsJsonAsync(new { status = report.Status.ToString(), reads }),
+        };
+    }
+
+    private static ReadsAdapter ReadsAdapterOf(WebApplication app) =>
+        app.Services.GetRequiredService<IOptions<PersistenceOptions>>().Value.Reads;
 }

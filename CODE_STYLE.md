@@ -39,6 +39,7 @@ Worktime.Api/Controllers/
 - **Interfaces/**: las interfaces **nunca** se declaran junto a su implementación ni junto a quien las usa. Las de una feature van en `<Feature>/Interfaces/`; las transversales, en `Common/Interfaces/`.
 - Lo que no es command, query, result ni interfaz va en la raíz de la feature.
 - Los nombres no cambian solo para cumplir la carpeta: un `*Dto` en `Results/` sigue llamándose `*Dto`.
+- Si un puerto tiene más de una implementación, van juntas en la carpeta de la feature, con la tecnología como prefijo: `EfWorkLogReads.cs` y `DapperWorkLogReads.cs`. Los tipos que solo sirven al mapeo (por ejemplo el `Row` de Dapper) se anidan como `private` dentro de su clase.
 
 ## Namespaces = carpetas
 

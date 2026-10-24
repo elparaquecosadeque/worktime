@@ -49,6 +49,8 @@ services:
       Seed__ResetInterval: ${SEED_RESET_INTERVAL:-24:00:00}
       Cache__TeamSummarySeconds: ${TEAM_SUMMARY_CACHE_SECONDS:-5}
       Diagnostics__SlowRequestMs: "500"
+      Diagnostics__ExposeReadsAdapter: "true" # /health names the adapter; docker-compose.server.yml turns it off
+      Persistence__Reads: ${PERSISTENCE_READS:-Ef} # Ef | Dapper: who implements the read side (writes are always EF)
       Cors__Origins__0: http://localhost:4200
     depends_on:
       postgres: { condition: service_healthy }

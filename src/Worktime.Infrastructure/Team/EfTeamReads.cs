@@ -6,12 +6,12 @@ using Worktime.Infrastructure.Persistence;
 
 namespace Worktime.Infrastructure.Team;
 
-internal sealed class TeamReads(WorktimeDbContext db) : ITeamReads
+internal sealed class EfTeamReads(WorktimeDbContext db) : ITeamReads
 {
     public async Task<IReadOnlyList<TeamWorkerRow>> ListWorkersAsync(Guid? supervisorId, CancellationToken ct) =>
         await db.Users.AsNoTracking()
             .Where(u => u.Role == Role.Worker && u.IsActive && (supervisorId == null || u.SupervisorId == supervisorId))
-            .OrderBy(u => u.Name)
+            .OrderBy(u => u.Name).ThenBy(u => u.Id)
             .Select(u => new TeamWorkerRow(u.Id, u.Name, u.TimeZoneId, u.SupervisorId,
                 db.PunchSessions.Where(p => p.WorkerId == u.Id && p.EndedAt == null).Select(p => (DateTimeOffset?)p.StartedAt).FirstOrDefault()))
             .ToListAsync(ct);
@@ -19,7 +19,7 @@ internal sealed class TeamReads(WorktimeDbContext db) : ITeamReads
     public async Task<IReadOnlyList<TeamSupervisorRow>> ListSupervisorsAsync(CancellationToken ct) =>
         await db.Users.AsNoTracking()
             .Where(u => u.Role == Role.Supervisor && u.IsActive)
-            .OrderBy(u => u.Name)
+            .OrderBy(u => u.Name).ThenBy(u => u.Id)
             .Select(u => new TeamSupervisorRow(u.Id, u.Name))
             .ToListAsync(ct);
 

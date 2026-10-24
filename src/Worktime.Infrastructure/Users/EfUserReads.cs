@@ -7,10 +7,10 @@ using Worktime.Infrastructure.Persistence;
 
 namespace Worktime.Infrastructure.Users;
 
-internal sealed class UserReads(WorktimeDbContext db) : IUserReads
+internal sealed class EfUserReads(WorktimeDbContext db) : IUserReads
 {
     private IQueryable<UserDto> Project(IQueryable<User> users) =>
-        users.OrderBy(u => u.Role).ThenBy(u => u.Name).Select(u => new UserDto(
+        users.OrderBy(u => u.Role).ThenBy(u => u.Name).ThenBy(u => u.Id).Select(u => new UserDto(
             u.Id, u.Name, u.Email, u.Role, u.IsActive, u.SupervisorId,
             db.Users.Where(s => s.Id == u.SupervisorId).Select(s => s.Name).FirstOrDefault(),
             u.TimeZoneId));
