@@ -40,6 +40,7 @@ export function messageFor(code: string): string {
     case 'user.timezone_invalid': return $localize`:@@err.user.tz:Zona horaria desconocida.`;
     case 'user.not_managed': return $localize`:@@err.user.notManaged:Esta persona no está en tu equipo.`;
     case 'user.self_deactivation': return $localize`:@@err.user.self:No puedes desactivar tu propia cuenta.`;
+    case 'tenant.not_found': return $localize`:@@err.tenant.notFound:No existe un espacio con ese nombre.`;
     case 'permission.locked': return $localize`:@@err.perm.locked:Ese permiso del admin está bloqueado.`;
     default: return $localize`:@@err.generic:Algo falló. Inténtalo de nuevo.`;
   }

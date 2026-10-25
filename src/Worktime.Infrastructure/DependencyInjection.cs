@@ -13,6 +13,7 @@ using Worktime.Infrastructure.Punch;
 using Worktime.Infrastructure.Redis;
 using Worktime.Infrastructure.Seeding;
 using Worktime.Infrastructure.Team;
+using Worktime.Infrastructure.Tenants;
 using Worktime.Infrastructure.Users;
 using Worktime.Infrastructure.WorkLogs;
 
@@ -59,6 +60,7 @@ public static class DependencyInjection
         var reads = (config.GetSection(PersistenceOptions.Section).Get<PersistenceOptions>() ?? new PersistenceOptions()).Reads;
         return services
             .AddSharedKernel(config)
+            .AddTenantsModule()
             .AddUsersModule(reads)
             .AddPermissionsModule()
             .AddPunchModule()

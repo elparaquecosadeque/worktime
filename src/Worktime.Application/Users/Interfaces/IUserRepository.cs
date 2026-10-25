@@ -9,5 +9,7 @@ public interface IUserRepository
     Task<User?> GetForShareAsync(Guid id, CancellationToken ct);
     Task<User?> GetByEmailAsync(string email, CancellationToken ct);
     Task<IReadOnlyList<User>> ListByRolesAsync(IReadOnlyCollection<Role> roles, CancellationToken ct);
+    /// <summary>The only cross-tenant read: for jobs that start from a bare user id (presence sweep).</summary>
+    Task<Guid?> GetTenantIdAsync(Guid userId, CancellationToken ct);
     void Add(User user);
 }

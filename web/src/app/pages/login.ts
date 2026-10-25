@@ -5,6 +5,7 @@ import { Api } from '../core/api';
 import { Auth } from '../core/auth';
 import { messageFor } from '../core/feedback';
 import { DemoAccount, Problem, Role } from '../core/models';
+import { Tenancy, urlOnHost } from '../core/tenancy';
 import { browserZone } from '../core/time';
 import { Icon } from '../ui/icon';
 import { StationClock } from '../ui/station-clock';
@@ -31,7 +32,15 @@ import { StationClock } from '../ui/station-clock';
 
       <section class="flex items-center justify-center px-6 py-10 sm:px-10">
         <form class="w-full max-w-sm space-y-5" (ngSubmit)="submit()" novalidate>
-          <h2 class="text-2xl font-extrabold" i18n="@@login.heading">Entrar</h2>
+          <div>
+            <h2 class="text-2xl font-extrabold" i18n="@@login.heading">Entrar</h2>
+            @if (tenant(); as t) {
+              <p class="mt-1 text-sm text-ink-2">
+                <span i18n="@@login.space">Espacio</span> <strong>{{ t.name }}</strong> ·
+                <a class="underline" [href]="pickerUrl(t.rootHost)" i18n="@@login.switchSpace">Cambiar de espacio</a>
+              </p>
+            }
+          </div>
 
           @if (ended(); as reason) {
             <p class="flex items-start gap-2 rounded-[2px] bg-wait px-3 pb-2 pt-2.5 text-sm font-semibold text-ink" role="alert">
@@ -80,6 +89,8 @@ export class LoginPage {
   private auth = inject(Auth);
   private router = inject(Router);
 
+  protected tenant = inject(Tenancy).current;
+  protected pickerUrl = (rootHost: string) => urlOnHost(rootHost, '');
   protected zone = browserZone();
   protected clockLabel = $localize`:@@login.clockLabel:Reloj con la hora actual`;
   protected email = '';

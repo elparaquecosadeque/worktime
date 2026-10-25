@@ -22,8 +22,9 @@ public sealed class StampValidator(IConnectionMultiplexer redis, IMemoryCache me
             if (fromRedis.HasValue) return fromRedis.ToString();
 
             // Redis lost it (restart, demo reset): ask the source of truth. Unknown or inactive users get "".
+            // A fresh scope has no tenant, and the user id is globally unique: the filter is skipped on purpose.
             await using var scope = scopes.CreateAsyncScope();
-            var users = scope.ServiceProvider.GetRequiredService<WorktimeDbContext>().Users.AsNoTracking();
+            var users = scope.ServiceProvider.GetRequiredService<WorktimeDbContext>().Users.IgnoreQueryFilters().AsNoTracking();
             var fromDb = await users.Where(u => u.Id == userId && u.IsActive).Select(u => u.SecurityStamp).FirstOrDefaultAsync(ct) ?? "";
             if (fromDb != "") await db.HashSetAsync(Keys.Stamps, userId.ToString(), fromDb);
             return fromDb;

@@ -2,6 +2,7 @@ using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Worktime.Application.Assignments.Interfaces;
+using Worktime.Application.Common.Interfaces;
 using Worktime.Application.Team.Interfaces;
 using Worktime.Application.Users.Interfaces;
 using Worktime.Application.WorkLogs.Interfaces;
@@ -26,7 +27,7 @@ public sealed class ReadsEquivalenceTests(ApiFixture api)
     private static readonly DateTimeOffset To = DateTimeOffset.UtcNow.AddDays(1);
 
     [Fact]
-    public async Task Users() => await Compare<IUserReads>(db => (new EfUserReads(db), new DapperUserReads(db)), async (reads, users) =>
+    public async Task Users() => await Compare<IUserReads>((db, t) => (new EfUserReads(db), new DapperUserReads(db, t)), async (reads, users) =>
     {
         var results = new List<object?> { await reads.ListAsync(null, default), await reads.GetAsync(Guid.NewGuid(), default) };
         foreach (var u in users)
@@ -38,7 +39,7 @@ public sealed class ReadsEquivalenceTests(ApiFixture api)
     });
 
     [Fact]
-    public async Task WorkLogs() => await Compare<IWorkLogReads>(db => (new EfWorkLogReads(db), new DapperWorkLogReads(db)), async (reads, users) =>
+    public async Task WorkLogs() => await Compare<IWorkLogReads>((db, t) => (new EfWorkLogReads(db), new DapperWorkLogReads(db, t)), async (reads, users) =>
     {
         var all = await reads.ListPendingAsync(null, false, null, null, null, default);
         Assert.NotEmpty(all);
@@ -53,7 +54,7 @@ public sealed class ReadsEquivalenceTests(ApiFixture api)
     });
 
     [Fact]
-    public async Task Team() => await Compare<ITeamReads>(db => (new EfTeamReads(db), new DapperTeamReads(db)), async (reads, users) =>
+    public async Task Team() => await Compare<ITeamReads>((db, t) => (new EfTeamReads(db), new DapperTeamReads(db, t)), async (reads, users) =>
     {
         var workerIds = users.Where(u => u.Role == Role.Worker).Select(u => u.Id).ToList();
         var logs = await reads.ListLogsSinceAsync(workerIds, From, default);
@@ -69,15 +70,15 @@ public sealed class ReadsEquivalenceTests(ApiFixture api)
     });
 
     [Fact]
-    public async Task Assignments() => await Compare<IAssignmentReads>(db => (new EfAssignmentReads(db), new DapperAssignmentReads(db)),
+    public async Task Assignments() => await Compare<IAssignmentReads>((db, t) => (new EfAssignmentReads(db), new DapperAssignmentReads(db, t)),
         async (reads, _) => [await reads.ListPendingAsync(default)]);
 
-    private async Task Compare<TReads>(Func<WorktimeDbContext, (TReads Ef, TReads Dapper)> adapters, Func<TReads, IReadOnlyList<User>, Task<List<object?>>> run)
+    private async Task Compare<TReads>(Func<WorktimeDbContext, ITenantContext, (TReads Ef, TReads Dapper)> adapters, Func<TReads, IReadOnlyList<User>, Task<List<object?>>> run)
     {
-        await using var scope = api.Factory.Services.CreateAsyncScope();
+        await using var scope = api.TenantScope();
         var db = scope.ServiceProvider.GetRequiredService<WorktimeDbContext>();
         var users = await db.Users.AsNoTracking().OrderBy(u => u.Email).ToListAsync();
-        var (ef, dapper) = adapters(db);
+        var (ef, dapper) = adapters(db, scope.ServiceProvider.GetRequiredService<ITenantContext>());
 
         var expected = JsonSerializer.Serialize(await run(ef, users), ApiFixture.Json);
         var actual = JsonSerializer.Serialize(await run(dapper, users), ApiFixture.Json);

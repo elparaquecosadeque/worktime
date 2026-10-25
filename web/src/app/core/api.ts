@@ -2,8 +2,8 @@ import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http'
 import { Injectable, inject } from '@angular/core';
 import { firstValueFrom, Observable } from 'rxjs';
 import {
-  AssignmentRequestDto, BatchItemResult, Decision, DemoAccount, LoginResult, MatrixDto, MeDto, Problem, Role,
-  SaveMatrixResult, SupervisorRow, TeamSummaryDto, UserDto, WorkLogDto,
+  AssignmentRequestDto, BatchItemResult, CurrentTenant, Decision, DemoAccount, LoginResult, MatrixDto, MeDto, Problem, Role,
+  SaveMatrixResult, SupervisorRow, TeamSummaryDto, TenantHost, UserDto, WorkLogDto,
 } from './models';
 
 /** Thin typed client. Every call resolves or rejects with a {@link Problem} carrying the API's stable code. */
@@ -18,6 +18,10 @@ export class Api {
       throw toProblem(e);
     }
   }
+
+  // tenants (public)
+  currentTenant = () => this.call(this.http.get<CurrentTenant>('/api/tenant'));
+  findTenant = (slug: string) => this.call(this.http.get<TenantHost>(`/api/tenants/${encodeURIComponent(slug)}`));
 
   // auth
   login = (email: string, password: string) => this.call(this.http.post<LoginResult>('/api/auth/login', { email, password }));

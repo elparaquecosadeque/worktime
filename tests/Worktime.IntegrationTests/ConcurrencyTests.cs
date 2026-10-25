@@ -20,11 +20,9 @@ namespace Worktime.IntegrationTests;
 [Collection(nameof(ApiCollection))]
 public sealed class ConcurrencyTests(ApiFixture api)
 {
-    private IServiceProvider Services => api.Factory.Services;
-
     private async Task<(User Supervisor, WorkLog Log)> APendingLogOf(string supervisorEmail)
     {
-        await using var scope = Services.CreateAsyncScope();
+        await using var scope = api.TenantScope();
         var db = scope.ServiceProvider.GetRequiredService<WorktimeDbContext>();
         var supervisor = await db.Users.AsNoTracking().SingleAsync(u => u.Email == supervisorEmail);
         var log = await db.WorkLogs.AsNoTracking()
@@ -47,7 +45,7 @@ public sealed class ConcurrencyTests(ApiFixture api)
 
         var attempts = Enumerable.Range(0, 10).Select(async _ =>
         {
-            await using var scope = Services.CreateAsyncScope();
+            await using var scope = api.TenantScope();
             var sp = scope.ServiceProvider;
             var decider = new WorkLogDecider(
                 sp.GetRequiredService<IUserRepository>(), sp.GetRequiredService<IWorkLogRepository>(), sp.GetRequiredService<IUnitOfWork>(),
@@ -67,7 +65,7 @@ public sealed class ConcurrencyTests(ApiFixture api)
         Assert.Equal(1, outcomes.Count(o => o == "ok"));
         Assert.Equal(9, outcomes.Count(o => o == "conflict"));
 
-        await using var check = Services.CreateAsyncScope();
+        await using var check = api.TenantScope();
         var db = check.ServiceProvider.GetRequiredService<WorktimeDbContext>();
         Assert.Equal(WorkLogStatus.Approved, (await db.WorkLogs.AsNoTracking().SingleAsync(l => l.Id == log.Id)).Status);
         Assert.Equal(1, await db.WorkLogEvents.CountAsync(e => e.WorkLogId == log.Id && e.To == WorkLogStatus.Approved));
@@ -82,7 +80,7 @@ public sealed class ConcurrencyTests(ApiFixture api)
 
         var approve = Task.Run(async () =>
         {
-            await using var scope = Services.CreateAsyncScope();
+            await using var scope = api.TenantScope();
             await start.Task;
             try
             {
@@ -93,7 +91,7 @@ public sealed class ConcurrencyTests(ApiFixture api)
         });
         var unassign = Task.Run(async () =>
         {
-            await using var scope = Services.CreateAsyncScope();
+            await using var scope = api.TenantScope();
             await start.Task;
             await scope.ServiceProvider.GetRequiredService<Mediator.IMediator>().Send(new UnassignWorkerCommand(ActorOf(supervisor), log.WorkerId));
         });
@@ -101,7 +99,7 @@ public sealed class ConcurrencyTests(ApiFixture api)
         var approved = await approve;
         await unassign;
 
-        await using var check = Services.CreateAsyncScope();
+        await using var check = api.TenantScope();
         var db = check.ServiceProvider.GetRequiredService<WorktimeDbContext>();
         var final = await db.WorkLogs.AsNoTracking().SingleAsync(l => l.Id == log.Id);
         Assert.Null((await db.Users.AsNoTracking().SingleAsync(u => u.Id == log.WorkerId)).SupervisorId);
@@ -151,6 +149,6 @@ public sealed class ConcurrencyTests(ApiFixture api)
         var worker = await api.LoginAsync("worker1@worktime.demo");
         Assert.Equal(HttpStatusCode.Forbidden, (await worker.GetAsync("/api/worklogs/inbox")).StatusCode);
         Assert.Equal(HttpStatusCode.Forbidden, (await worker.GetAsync("/api/permissions")).StatusCode);
-        Assert.Equal(HttpStatusCode.Unauthorized, (await api.Factory.CreateClient().GetAsync("/api/me")).StatusCode);
+        Assert.Equal(HttpStatusCode.Unauthorized, (await api.Client().GetAsync("/api/me")).StatusCode);
     }
 }

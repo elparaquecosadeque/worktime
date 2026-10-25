@@ -31,6 +31,9 @@ export interface MeDto { user: UserDto; permissions: string[]; workingSince: str
 export interface LoginResult { token: string; expiresAt: string; user: UserDto; permissions: string[]; }
 
 export interface DemoAccount { role: Role; name: string; email: string; password: string; hint: string; }
+export type TenantStatus = 'PendingPayment' | 'Active' | 'PastDue' | 'Canceled';
+export interface CurrentTenant { name: string; slug: string; status: TenantStatus; isDemo: boolean; rootHost: string; }
+export interface TenantHost { name: string; slug: string; host: string; }
 
 export interface WorkLogEventDto { at: string; actorId: string; actorName: string; from: WorkLogStatus | null; to: WorkLogStatus; reason: string | null; }
 

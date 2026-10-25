@@ -15,10 +15,11 @@ Requiere Docker Desktop (WSL2 en Windows).
 
 ```bash
 docker compose up --build
-# → http://localhost:8080   (redirige a /es/ o /en/ según el navegador)
+# → http://localhost:8080        selector de espacio (redirige a /es/ o /en/ según el navegador)
+# → http://demo.localhost:8080   el espacio "demo" (también "acme"); los navegadores resuelven *.localhost solos
 ```
 
-En el login, el dropdown **Cuenta de demo** llena las credenciales (contraseña `Demo1234!`):
+Cada organización (**tenant**) vive en su subdominio: en el servidor, `worktime.gerardoleon.dev` es el selector y `{slug}-worktime.gerardoleon.dev` es cada espacio (ver [Multitenancy](#multitenancy)). En el login de un espacio demo, el dropdown **Cuenta de demo** llena las credenciales (contraseña `Demo1234!`). Los dos espacios demo tienen las mismas cuentas, con personas y datos distintos:
 
 | Cuenta | Para ver |
 |---|---|
@@ -35,7 +36,7 @@ En el login, el dropdown **Cuenta de demo** llena las credenciales (contraseña 
 ```bash
 docker compose up postgres redis          # solo infraestructura
 dotnet run --project src/Worktime.Api     # http://localhost:5080 (migra y siembra al arrancar)
-cd web && npm start                       # http://localhost:4200, proxy /api y /hubs → :5080
+cd web && npm start                       # http://demo.localhost:4200, proxy /api y /hubs → :5080 (conserva el Host)
 ```
 
 ### Configuración (`appsettings.json` o variables de entorno)
@@ -57,7 +58,7 @@ En compose: `SEED_RESET_INTERVAL`, `TEAM_SUMMARY_CACHE_SECONDS`, `JWT_SIGNING_KE
 
 El `Jenkinsfile` de este repo lo ejecuta el Jenkins self-hosted del repo hermano [`jenkins-local`](../jenkins-local), que hace polling de `main` cada 2 minutos:
 
-1. **Tests:** los 51, incluidos los de integración con Testcontainers, en un contenedor del SDK.
+1. **Tests:** los 69, incluidos los de integración con Testcontainers, en un contenedor del SDK.
 2. **Imágenes y release:** `worktime-api:<build>-<sha>` y `worktime-web:<build>-<sha>`, más un *release* con el `docker-compose.yml` y el script de esa versión.
 3. **Deploy rolling** ([`deploy/rolling-deploy.sh`](deploy/rolling-deploy.sh)), con [`docker-compose.server.yml`](docker-compose.server.yml) encima: en el servidor Postgres es el compartido de jenkins-local, no el de este compose. actualiza api-1, espera a que esté healthy, sigue con api-2 y luego nginx. nginx re-resuelve el DNS de las réplicas (`resolve`) y salta en 2 s a la otra si una no responde.
 4. **Smoke test** por nginx.
@@ -101,6 +102,23 @@ curl http://localhost:8080/health                # {"status":"Healthy","reads":"
 ```
 
 En el servidor: *Build with Parameters* → `DEPLOY_TAG` = el tag en producción y `READS_ADAPTER` = `Dapper`. Es un rolling restart sin build y sin downtime (las dos réplicas pasan una por una).
+
+## Multitenancy
+
+**Esquema compartido + `tenant_id` en cada tabla**, con el tenant resuelto por el **Host** de la request.
+
+| Pieza | Cómo aísla |
+|---|---|
+| `TenantResolutionMiddleware` | `Host` → slug → `Tenant` (caché de 30 s) → `ITenantContext` del scope. En el host raíz no hay tenant |
+| JWT | Claim `tenant_id`; `OnTokenValidated` rechaza (401) un token cuyo tenant no es el del Host |
+| EF Core | `tenant_id` es una *shadow property*: el dominio no la ve. Global query filter en las 6 tablas y `SaveChanges` la asigna (insertar sin tenant en el scope es un error, nunca un default) |
+| Dapper | No pasa por los filtros de EF: cada consulta filtra `tenant_id` explícitamente |
+| Índices | `ix_users_email` es `(tenant_id, email)`: el mismo email puede existir en dos organizaciones |
+| SignalR | Grupos `admins-{tenant}` y `tenant-{tenant}`. El hub corre cada llamada en un scope nuevo: `HubGuardFilter` le pone el tenant del token |
+| Redis | La caché del resumen de equipo lleva el tenant en la clave. Stamps y presencia van por id de usuario (globalmente único) |
+| Jobs | Fijan el tenant explícitamente; el reset de la demo solo toca los tenants `IsDemo` |
+
+`TenantIsolationTests` lo verifica contra los dos espacios demo, que tienen las mismas cuentas: un token solo sirve en su host, la API no devuelve nada del otro tenant y **los dos adaptadores de lectura** (EF y Dapper) tampoco. Quitar el filtro de una sola consulta Dapper hace fallar el test.
 
 ## Doble aprobación: defensa en capas
 
@@ -147,9 +165,9 @@ ForwardedHeaders → ExceptionHandler (ProblemDetails + code) → CorrelationId 
 
 ## Datos de demo
 
-`DemoSeeder` (Bogus, locale `es`) genera 1 admin, 2 supervisores y 9 trabajadores (uno sin supervisor, uno desactivado), con unas 5 semanas de registros **relativos a hoy** en todos los estados, historial coherente, dos personas marcando en este momento y una solicitud pendiente. Los ids son aleatorios: tras cada reset los tokens viejos apuntan a nadie, y el stamp fuerza el relogin.
+`DemoSeeder` (Bogus, locale `es`) siembra los espacios `demo` y `acme`, con **ids de tenant fijos**, y en cada uno genera 1 admin, 2 supervisores y 9 trabajadores (uno sin supervisor, uno desactivado), con unas 5 semanas de registros **relativos a hoy** en todos los estados, historial coherente, dos personas marcando en este momento y una solicitud pendiente. Los ids de usuario son aleatorios: tras cada reset los tokens viejos apuntan a nadie, y el stamp fuerza el relogin.
 
-`DemoResetService` corre cada `Seed:ResetInterval`. El advisory lock más el chequeo "¿los datos siguen frescos?" garantizan que **una sola réplica** resetee por intervalo.
+`DemoResetService` corre cada `Seed:ResetInterval` y **solo borra los datos de los tenants demo** (los tenants reales comparten las tablas). El advisory lock más el chequeo "¿los datos siguen frescos?" garantizan que **una sola réplica** resetee por intervalo.
 
 ## Tests
 

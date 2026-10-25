@@ -9,6 +9,9 @@ services:
     environment:
       ConnectionStrings__Postgres: Host=shared-postgres;Database=worktime;Username=worktime;Password=${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
       Diagnostics__ExposeReadsAdapter: "false" # public /health stays plain; rolling-deploy.sh checks the adapter in the logs
+      # cloudflared sends worktime.gerardoleon.dev and *.gerardoleon.dev here (jenkins-local/cloudflared/config.yml).
+      Tenancy__RootHost: worktime.gerardoleon.dev
+      Tenancy__TenantHostSuffix: -worktime.gerardoleon.dev
     depends_on: !override
       redis: { condition: service_healthy }
     networks: [default, shared-db]

@@ -10,7 +10,7 @@ namespace Worktime.Api.Auth;
 
 public sealed class JwtTokenIssuer(IOptions<JwtOptions> options, IClock clock) : ITokenIssuer
 {
-    public IssuedToken Issue(User user, IReadOnlyCollection<string> permissions)
+    public IssuedToken Issue(User user, Guid tenantId, IReadOnlyCollection<string> permissions)
     {
         var o = options.Value;
         var expires = clock.UtcNow.AddHours(o.LifetimeHours);
@@ -21,6 +21,7 @@ public sealed class JwtTokenIssuer(IOptions<JwtOptions> options, IClock clock) :
             new(WorktimeClaims.Email, user.Email),
             new(WorktimeClaims.Role, user.Role.ToString()),
             new(WorktimeClaims.Stamp, user.SecurityStamp),
+            new(WorktimeClaims.TenantId, tenantId.ToString()),
         };
         claims.AddRange(permissions.Select(p => new Claim(WorktimeClaims.Permission, p)));
         if (user.SupervisorId is { } sid) claims.Add(new(WorktimeClaims.SupervisorId, sid.ToString()));

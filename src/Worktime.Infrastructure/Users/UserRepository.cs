@@ -18,5 +18,9 @@ internal sealed class UserRepository(WorktimeDbContext db) : IUserRepository
     public async Task<IReadOnlyList<User>> ListByRolesAsync(IReadOnlyCollection<Role> roles, CancellationToken ct) =>
         await db.Users.Where(u => roles.Contains(u.Role)).ToListAsync(ct);
 
+    public async Task<Guid?> GetTenantIdAsync(Guid userId, CancellationToken ct) =>
+        await db.Users.IgnoreQueryFilters().Where(u => u.Id == userId)
+            .Select(u => (Guid?)EF.Property<Guid>(u, WorktimeDbContext.TenantIdProperty)).FirstOrDefaultAsync(ct);
+
     public void Add(User user) => db.Users.Add(user);
 }
