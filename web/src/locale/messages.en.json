@@ -240,6 +240,16 @@
     "today.ongoing": "ongoing",
     "today.workingPlate": "Working",
     "today.supervisorLine": "Supervisor: {$START_TAG_SPAN}{$INTERPOLATION}{$CLOSE_TAG_SPAN}",
-    "matrix.fixed": "Fixed"
+    "matrix.fixed": "Fixed",
+    "err.tenant.notFound": "There's no space with that name.",
+    "picker.lede": "Each organization has its own space, with its people, its hours and its permissions.",
+    "picker.heading": "Which space are you signing in to?",
+    "picker.slug": "Space name",
+    "picker.slugPlaceholder": "your-company",
+    "picker.submit": "Go to my space",
+    "picker.demoLede": "Just looking? Enter the demo space, with ready-made accounts for every role.",
+    "picker.demo": "Try the demo",
+    "login.space": "Space",
+    "login.switchSpace": "Switch space"
   }
 }

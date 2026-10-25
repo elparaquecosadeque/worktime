@@ -52,6 +52,9 @@ services:
       Diagnostics__ExposeReadsAdapter: "true" # /health names the adapter; docker-compose.server.yml turns it off
       Persistence__Reads: ${PERSISTENCE_READS:-Ef} # Ef | Dapper: who implements the read side (writes are always EF)
       Cors__Origins__0: http://localhost:4200
+      # Root host = space picker; {slug}{suffix} = one tenant. Locally http://demo.localhost:8080 (browsers resolve *.localhost).
+      Tenancy__RootHost: ${TENANCY_ROOT_HOST:-localhost}
+      Tenancy__TenantHostSuffix: ${TENANCY_HOST_SUFFIX:-.localhost}
     depends_on:
       postgres: { condition: service_healthy }
       redis: { condition: service_healthy }

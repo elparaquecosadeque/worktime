@@ -18,7 +18,7 @@ public sealed record DecideBatchCommand(Actor Actor, IReadOnlyList<Guid> WorkLog
     }
 }
 
-public sealed class DecideBatchHandler(IServiceScopeFactory scopes) : ICommandHandler<DecideBatchCommand, IReadOnlyList<BatchItemResult>>
+public sealed class DecideBatchHandler(IServiceScopeFactory scopes, ITenantContext tenant) : ICommandHandler<DecideBatchCommand, IReadOnlyList<BatchItemResult>>
 {
     public async ValueTask<IReadOnlyList<BatchItemResult>> Handle(DecideBatchCommand c, CancellationToken ct)
     {
@@ -27,6 +27,7 @@ public sealed class DecideBatchHandler(IServiceScopeFactory scopes) : ICommandHa
         {
             // A fresh scope (own DbContext) per item: a failed save must not leave stale tracked state for the next one.
             await using var scope = scopes.CreateAsyncScope();
+            scope.ServiceProvider.GetRequiredService<ITenantContext>().Use(tenant.Id); // a new scope starts with no tenant
             try
             {
                 await scope.ServiceProvider.GetRequiredService<WorkLogDecider>().DecideAsync(c.Actor, id, c.Decision, c.Reason, ct);

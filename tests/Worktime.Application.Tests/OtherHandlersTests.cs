@@ -61,9 +61,9 @@ public class TeamSummaryTests
         var reads = Substitute.For<ITeamReads>();
         var cache = Substitute.For<ICacheStore>();
         var cached = new TeamSummaryDto(Fake.Now, []);
-        cache.GetOrCreateAsync("team-summary:all", TimeSpan.FromSeconds(5), Arg.Any<Func<CancellationToken, Task<TeamSummaryDto>>>(), Arg.Any<CancellationToken>())
+        cache.GetOrCreateAsync($"team-summary:{Fake.TenantId}:all", TimeSpan.FromSeconds(5), Arg.Any<Func<CancellationToken, Task<TeamSummaryDto>>>(), Arg.Any<CancellationToken>())
             .Returns(cached);
-        var handler = new TeamSummaryHandler(reads, Substitute.For<IPresenceStore>(), cache, Fake.Clock(), Options.Create(new CacheOptions()));
+        var handler = new TeamSummaryHandler(reads, Substitute.For<IPresenceStore>(), cache, Fake.Clock(), Fake.Tenant(), Options.Create(new CacheOptions()));
 
         var result = await handler.Handle(new TeamSummaryQuery(Fake.ActorFor(Fake.User(Role.Admin))), default);
 
@@ -91,7 +91,7 @@ public class TeamSummaryTests
         cache.GetOrCreateAsync(default!, default, default(Func<CancellationToken, Task<TeamSummaryDto>>)!, default)
             .ReturnsForAnyArgs(ci => ci.Arg<Func<CancellationToken, Task<TeamSummaryDto>>>()(default));
 
-        var result = await new TeamSummaryHandler(reads, presence, cache, Fake.Clock(), Options.Create(new CacheOptions()))
+        var result = await new TeamSummaryHandler(reads, presence, cache, Fake.Clock(), Fake.Tenant(), Options.Create(new CacheOptions()))
             .Handle(new TeamSummaryQuery(Fake.ActorFor(supervisor)), default);
 
         var members = Assert.Single(result.Groups).Members;
@@ -171,7 +171,8 @@ public class RealtimeDispatchTests
         var notifier = Substitute.For<IRealtimeNotifier>();
         var stamps = Substitute.For<IStampStore>();
         var users = Substitute.For<IUserRepository>();
-        var dispatcher = new RealtimeEventDispatcher(notifier, stamps, users, new Audience(users), NullLogger<RealtimeEventDispatcher>.Instance);
+        var tenant = Fake.Tenant();
+        var dispatcher = new RealtimeEventDispatcher(notifier, stamps, users, new Audience(users, tenant), tenant, NullLogger<RealtimeEventDispatcher>.Instance);
         var user = Fake.User(Role.Worker);
         user.Deactivate();
 
@@ -184,7 +185,7 @@ public class RealtimeDispatchTests
     }
 
     [Fact]
-    public async Task Status_changes_go_to_the_worker_their_supervisor_and_admins()
+    public async Task Status_changes_go_to_the_worker_their_supervisor_and_their_tenants_admins()
     {
         var notifier = Substitute.For<IRealtimeNotifier>();
         var users = Substitute.For<IUserRepository>();
@@ -197,11 +198,12 @@ public class RealtimeDispatchTests
         log.ClearDomainEvents();
         log.Decide(Domain.WorkLogs.Decision.Approve, supervisor.Id, null, Fake.Now);
 
-        await new RealtimeEventDispatcher(notifier, Substitute.For<IStampStore>(), users, new Audience(users), NullLogger<RealtimeEventDispatcher>.Instance)
+        var tenant = Fake.Tenant();
+        await new RealtimeEventDispatcher(notifier, Substitute.For<IStampStore>(), users, new Audience(users, tenant), tenant, NullLogger<RealtimeEventDispatcher>.Instance)
             .DispatchAsync(log.DomainEvents, default);
 
         await notifier.Received(1).SendAsync(
-            Arg.Is<IReadOnlyCollection<string>>(g => g.ToHashSet().SetEquals(new[] { RealtimeGroups.Admins, RealtimeGroups.Supervisor(supervisor.Id), RealtimeGroups.User(worker.Id) })),
+            Arg.Is<IReadOnlyCollection<string>>(g => g.ToHashSet().SetEquals(new[] { RealtimeGroups.Admins(Fake.TenantId), RealtimeGroups.Supervisor(supervisor.Id), RealtimeGroups.User(worker.Id) })),
             RealtimeEvents.WorkLogStatusChanged, Arg.Any<object>(), Arg.Any<CancellationToken>());
     }
 }

@@ -5,6 +5,7 @@ using Worktime.Application.Common.Interfaces;
 using Worktime.Domain.Assignments;
 using Worktime.Domain.Permissions;
 using Worktime.Domain.Punch;
+using Worktime.Domain.Tenants;
 using Worktime.Domain.Users;
 using Worktime.Domain.WorkLogs;
 using Worktime.Infrastructure.Persistence;
@@ -12,14 +13,33 @@ using Worktime.Infrastructure.Persistence;
 namespace Worktime.Infrastructure.Seeding;
 
 /// <summary>
-/// Realistic demo data relative to "now", so the current month is never empty. Ids are random on purpose:
-/// after a reset every old token points at nobody and the stamp check forces a fresh login.
+/// Realistic demo data relative to "now", so the current month is never empty. User ids are random on purpose:
+/// after a reset every old token points at nobody and the stamp check forces a fresh login. Tenant ids are fixed.
 /// </summary>
-public sealed class DemoSeeder(IPasswordHasher hasher, IOptions<SeedOptions> options)
+public sealed class DemoSeeder(IPasswordHasher hasher, ITenantContext tenant, IOptions<SeedOptions> options)
 {
     public const string AdminEmail = "admin@worktime.demo";
 
+    /// <summary>Tenant-owned tables in delete order (children first).</summary>
+    private static readonly string[] OwnedTables = ["work_log_events", "work_logs", "punch_sessions", "assignment_requests", "role_permissions", "users"];
+
+    /// <summary>Creates the demo tenants that are missing and seeds each one.</summary>
     public async Task SeedAsync(WorktimeDbContext db, DateTimeOffset now, CancellationToken ct)
+    {
+        var existing = await db.Tenants.Select(t => t.Id).ToListAsync(ct);
+        db.Tenants.AddRange(DemoTenants.All.Where(d => !existing.Contains(d.Id))
+            .Select(d => Tenant.Create(d.Id, d.Name, d.Slug, TenantStatus.Active, isDemo: true, now)));
+        await db.SaveChangesAsync(ct);
+
+        foreach (var (id, _, _) in DemoTenants.All)
+        {
+            tenant.Use(id);
+            await SeedTenantAsync(db, now, ct);
+        }
+    }
+
+    /// <summary>Seeds the scope's current tenant.</summary>
+    public async Task SeedTenantAsync(WorktimeDbContext db, DateTimeOffset now, CancellationToken ct)
     {
         var faker = new Faker("es");
         var hash = hasher.Hash(options.Value.DemoPassword);
@@ -98,7 +118,12 @@ public sealed class DemoSeeder(IPasswordHasher hasher, IOptions<SeedOptions> opt
         return new DateTimeOffset(local, zone.GetUtcOffset(local)).ToUniversalTime();
     }
 
-    public static async Task ClearAsync(WorktimeDbContext db, CancellationToken ct) =>
-        await db.Database.ExecuteSqlRawAsync(
-            "TRUNCATE work_log_events, work_logs, punch_sessions, assignment_requests, role_permissions, users CASCADE", ct);
+    /// <summary>Deletes one tenant's data and keeps the tenant row (and, from Fase 2, its Stripe customer).</summary>
+    public static async Task ClearTenantAsync(WorktimeDbContext db, Guid tenantId, CancellationToken ct)
+    {
+        // users.supervisor_id is ON DELETE RESTRICT: unlink first so the users can go in one statement.
+        await db.Database.ExecuteSqlAsync($"UPDATE users SET supervisor_id = NULL WHERE tenant_id = {tenantId}", ct);
+        foreach (var table in OwnedTables)
+            await db.Database.ExecuteSqlRawAsync($"DELETE FROM {table} WHERE tenant_id = {{0}}", [tenantId], ct);
+    }
 }

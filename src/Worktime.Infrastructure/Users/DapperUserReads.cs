@@ -1,5 +1,6 @@
 using Dapper;
 using Microsoft.EntityFrameworkCore;
+using Worktime.Application.Common.Interfaces;
 using Worktime.Application.Users.Interfaces;
 using Worktime.Application.Users.Results;
 using Worktime.Domain.Assignments;
@@ -8,8 +9,8 @@ using Worktime.Infrastructure.Persistence;
 
 namespace Worktime.Infrastructure.Users;
 
-/// <summary>Same contract as <see cref="EfUserReads"/>, hand-written SQL.</summary>
-internal sealed class DapperUserReads(WorktimeDbContext db) : IUserReads
+/// <summary>Same contract as <see cref="EfUserReads"/>, hand-written SQL. No EF query filter here: tenant_id is explicit.</summary>
+internal sealed class DapperUserReads(WorktimeDbContext db, ITenantContext tenant) : IUserReads
 {
     private const string SelectUsers = """
         SELECT u.id AS "Id", u.name AS "Name", u.email AS "Email", u.role AS "Role", u.is_active AS "IsActive",
@@ -21,16 +22,16 @@ internal sealed class DapperUserReads(WorktimeDbContext db) : IUserReads
     public async Task<IReadOnlyList<UserDto>> ListAsync(Guid? supervisorId, CancellationToken ct) =>
         (await db.Database.GetDbConnection().QueryAsync<UserRow>(new CommandDefinition($"""
             {SelectUsers}
-            WHERE @supervisorId::uuid IS NULL OR u.supervisor_id = @supervisorId
+            WHERE u.tenant_id = @tenantId AND (@supervisorId::uuid IS NULL OR u.supervisor_id = @supervisorId)
             ORDER BY u.role, u.name, u.id
-            """, new { supervisorId }, cancellationToken: ct)))
+            """, new { tenantId = tenant.Id, supervisorId }, cancellationToken: ct)))
         .Select(u => u.ToDto()).ToList();
 
     public async Task<UserDto?> GetAsync(Guid id, CancellationToken ct) =>
         (await db.Database.GetDbConnection().QuerySingleOrDefaultAsync<UserRow>(new CommandDefinition($"""
             {SelectUsers}
-            WHERE u.id = @id
-            """, new { id }, cancellationToken: ct)))
+            WHERE u.tenant_id = @tenantId AND u.id = @id
+            """, new { tenantId = tenant.Id, id }, cancellationToken: ct)))
         ?.ToDto();
 
     public async Task<MeDto?> GetMeAsync(Guid id, IReadOnlyList<string> permissions, CancellationToken ct)
@@ -38,14 +39,14 @@ internal sealed class DapperUserReads(WorktimeDbContext db) : IUserReads
         if (await GetAsync(id, ct) is not { } user) return null;
         var connection = db.Database.GetDbConnection();
         var workingSince = await connection.QueryFirstOrDefaultAsync<DateTime?>(new CommandDefinition("""
-            SELECT started_at FROM punch_sessions WHERE worker_id = @id AND ended_at IS NULL LIMIT 1
-            """, new { id }, cancellationToken: ct));
+            SELECT started_at FROM punch_sessions WHERE tenant_id = @tenantId AND worker_id = @id AND ended_at IS NULL LIMIT 1
+            """, new { tenantId = tenant.Id, id }, cancellationToken: ct));
         var pending = await connection.QueryFirstOrDefaultAsync<PendingRow>(new CommandDefinition("""
             SELECT id AS "Id", created_at AS "CreatedAt", note AS "Note", preferred_supervisor_id AS "PreferredSupervisorId"
             FROM assignment_requests
-            WHERE worker_id = @id AND status = @pending
+            WHERE tenant_id = @tenantId AND worker_id = @id AND status = @pending
             LIMIT 1
-            """, new { id, pending = nameof(AssignmentStatus.Pending) }, cancellationToken: ct));
+            """, new { tenantId = tenant.Id, id, pending = nameof(AssignmentStatus.Pending) }, cancellationToken: ct));
         return new MeDto(user, permissions, workingSince is { } since ? new DateTimeOffset(since) : null, pending?.ToDto());
     }
 

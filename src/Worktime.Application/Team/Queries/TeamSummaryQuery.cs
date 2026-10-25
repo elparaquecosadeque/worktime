@@ -15,13 +15,14 @@ public sealed record TeamSummaryQuery(Actor Actor) : IQuery<TeamSummaryDto>;
 /// The expensive aggregate every dashboard asks for on load/reconnect. Cached briefly (Cache:TeamSummarySeconds)
 /// and never invalidated: live events carry deltas, the cache only absorbs reconnect storms. Never used for decisions.
 /// </summary>
-public sealed class TeamSummaryHandler(ITeamReads reads, IPresenceStore presence, ICacheStore cache, IClock clock, IOptions<CacheOptions> options)
+public sealed class TeamSummaryHandler(
+    ITeamReads reads, IPresenceStore presence, ICacheStore cache, IClock clock, ITenantContext tenant, IOptions<CacheOptions> options)
     : IQueryHandler<TeamSummaryQuery, TeamSummaryDto>
 {
     public async ValueTask<TeamSummaryDto> Handle(TeamSummaryQuery q, CancellationToken ct)
     {
         var scope = q.Actor.SeesAllTeams ? "all" : q.Actor.Id.ToString();
-        return await cache.GetOrCreateAsync($"team-summary:{scope}", TimeSpan.FromSeconds(options.Value.TeamSummarySeconds),
+        return await cache.GetOrCreateAsync($"team-summary:{tenant.Id}:{scope}", TimeSpan.FromSeconds(options.Value.TeamSummarySeconds),
             c => BuildAsync(q.Actor, c), ct);
     }
 

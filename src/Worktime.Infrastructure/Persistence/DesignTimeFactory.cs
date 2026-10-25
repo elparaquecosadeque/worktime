@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
+using Worktime.Infrastructure.Tenants;
 
 namespace Worktime.Infrastructure.Persistence;
 
@@ -10,5 +11,5 @@ public sealed class DesignTimeFactory : IDesignTimeDbContextFactory<WorktimeDbCo
         new(new DbContextOptionsBuilder<WorktimeDbContext>()
             .UseNpgsql("Host=localhost;Database=worktime;Username=worktime;Password=worktime")
             .UseSnakeCaseNamingConvention()
-            .Options);
+            .Options, new TenantContext());
 }

@@ -17,10 +17,11 @@ public sealed record LoginCommand(string Email, string Password) : ICommand<Logi
 
 public sealed class LoginHandler(
     IUserRepository users, IRolePermissionRepository matrix, IPasswordHasher hasher,
-    ITokenIssuer tokens, IStampStore stamps, IUserReads reads) : ICommandHandler<LoginCommand, LoginResult>
+    ITokenIssuer tokens, IStampStore stamps, IUserReads reads, ITenantContext tenant) : ICommandHandler<LoginCommand, LoginResult>
 {
     public async ValueTask<LoginResult> Handle(LoginCommand c, CancellationToken ct)
     {
+        // Scoped to the Host's tenant by the query filter: the same email may exist in another tenant.
         var user = await users.GetByEmailAsync(c.Email.Trim().ToLowerInvariant(), ct);
         // Same code for unknown email, wrong password and inactive user: no account enumeration.
         if (user is null || !user.IsActive || !hasher.Verify(user.PasswordHash, c.Password))
@@ -28,7 +29,7 @@ public sealed class LoginHandler(
 
         var permissions = await matrix.GetForRoleAsync(user.Role, ct);
         await stamps.SetAsync(user.Id, user.SecurityStamp, ct);
-        var token = tokens.Issue(user, permissions);
+        var token = tokens.Issue(user, tenant.Id, permissions);
         return new LoginResult(token.Token, token.ExpiresAt, (await reads.GetAsync(user.Id, ct))!, permissions);
     }
 }

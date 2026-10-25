@@ -23,7 +23,7 @@ public sealed class DatabaseInitializer(IServiceScopeFactory scopes, IOptions<Se
         {
             await db.Database.ExecuteSqlAsync($"SELECT pg_advisory_lock({LockKeys.Migrate})", ct);
             await db.Database.MigrateAsync(ct);
-            if (seed.Value.Enabled && !await db.Users.AnyAsync(ct))
+            if (seed.Value.Enabled && !await db.Tenants.AnyAsync(ct))
             {
                 await scope.ServiceProvider.GetRequiredService<DemoSeeder>().SeedAsync(db, clock.UtcNow, ct);
                 logger.LogInformation("Demo data seeded");

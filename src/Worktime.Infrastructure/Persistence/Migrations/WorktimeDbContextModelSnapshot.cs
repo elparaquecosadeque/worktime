@@ -62,6 +62,10 @@ namespace Worktime.Infrastructure.Persistence.Migrations
                         .HasColumnType("character varying(32)")
                         .HasColumnName("status");
 
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
                     b.Property<Guid>("WorkerId")
                         .HasColumnType("uuid")
                         .HasColumnName("worker_id");
@@ -71,6 +75,9 @@ namespace Worktime.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("PreferredSupervisorId")
                         .HasDatabaseName("ix_assignment_requests_preferred_supervisor_id");
+
+                    b.HasIndex("TenantId")
+                        .HasDatabaseName("ix_assignment_requests_tenant_id");
 
                     b.HasIndex("WorkerId")
                         .IsUnique()
@@ -82,6 +89,10 @@ namespace Worktime.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("Worktime.Domain.Permissions.RolePermission", b =>
                 {
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
                     b.Property<string>("Role")
                         .HasMaxLength(32)
                         .HasColumnType("character varying(32)")
@@ -92,7 +103,7 @@ namespace Worktime.Infrastructure.Persistence.Migrations
                         .HasColumnType("character varying(64)")
                         .HasColumnName("permission");
 
-                    b.HasKey("Role", "Permission")
+                    b.HasKey("TenantId", "Role", "Permission")
                         .HasName("pk_role_permissions");
 
                     b.ToTable("role_permissions", (string)null);
@@ -113,6 +124,10 @@ namespace Worktime.Infrastructure.Persistence.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("started_at");
 
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
                     b.Property<Guid>("WorkerId")
                         .HasColumnType("uuid")
                         .HasColumnName("worker_id");
@@ -120,12 +135,57 @@ namespace Worktime.Infrastructure.Persistence.Migrations
                     b.HasKey("Id")
                         .HasName("pk_punch_sessions");
 
+                    b.HasIndex("TenantId")
+                        .HasDatabaseName("ix_punch_sessions_tenant_id");
+
                     b.HasIndex("WorkerId")
                         .IsUnique()
                         .HasDatabaseName("ix_punch_sessions_open")
                         .HasFilter("ended_at IS NULL");
 
                     b.ToTable("punch_sessions", (string)null);
+                });
+
+            modelBuilder.Entity("Worktime.Domain.Tenants.Tenant", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<bool>("IsDemo")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_demo");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("name");
+
+                    b.Property<string>("Slug")
+                        .IsRequired()
+                        .HasMaxLength(54)
+                        .HasColumnType("character varying(54)")
+                        .HasColumnName("slug");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("status");
+
+                    b.HasKey("Id")
+                        .HasName("pk_tenants");
+
+                    b.HasIndex("Slug")
+                        .IsUnique()
+                        .HasDatabaseName("ix_tenants_slug");
+
+                    b.ToTable("tenants", (string)null);
                 });
 
             modelBuilder.Entity("Worktime.Domain.Users.User", b =>
@@ -176,6 +236,10 @@ namespace Worktime.Infrastructure.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("supervisor_id");
 
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
                     b.Property<string>("TimeZoneId")
                         .IsRequired()
                         .HasMaxLength(64)
@@ -191,12 +255,12 @@ namespace Worktime.Infrastructure.Persistence.Migrations
                     b.HasKey("Id")
                         .HasName("pk_users");
 
-                    b.HasIndex("Email")
-                        .IsUnique()
-                        .HasDatabaseName("ix_users_email");
-
                     b.HasIndex("SupervisorId")
                         .HasDatabaseName("ix_users_supervisor_id");
+
+                    b.HasIndex("TenantId", "Email")
+                        .IsUnique()
+                        .HasDatabaseName("ix_users_email");
 
                     b.ToTable("users", (string)null);
                 });
@@ -233,6 +297,10 @@ namespace Worktime.Infrastructure.Persistence.Migrations
                         .HasColumnType("character varying(32)")
                         .HasColumnName("status");
 
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
                     b.Property<uint>("Version")
                         .IsConcurrencyToken()
                         .ValueGeneratedOnAddOrUpdate()
@@ -249,6 +317,9 @@ namespace Worktime.Infrastructure.Persistence.Migrations
                     b.HasIndex("Status")
                         .HasDatabaseName("ix_work_logs_status");
 
+                    b.HasIndex("TenantId")
+                        .HasDatabaseName("ix_work_logs_tenant_id");
+
                     b.HasIndex("WorkerId", "StartAt")
                         .HasDatabaseName("ix_work_logs_worker_id_start_at");
 
@@ -258,7 +329,6 @@ namespace Worktime.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("Worktime.Domain.WorkLogs.WorkLogEvent", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
@@ -280,6 +350,10 @@ namespace Worktime.Infrastructure.Persistence.Migrations
                         .HasColumnType("character varying(1000)")
                         .HasColumnName("reason");
 
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("tenant_id");
+
                     b.Property<string>("To")
                         .IsRequired()
                         .HasMaxLength(32)
@@ -296,6 +370,9 @@ namespace Worktime.Infrastructure.Persistence.Migrations
                     b.HasIndex("ActorId")
                         .HasDatabaseName("ix_work_log_events_actor_id");
 
+                    b.HasIndex("TenantId")
+                        .HasDatabaseName("ix_work_log_events_tenant_id");
+
                     b.HasIndex("WorkLogId")
                         .HasDatabaseName("ix_work_log_events_work_log_id");
 
@@ -310,6 +387,13 @@ namespace Worktime.Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.SetNull)
                         .HasConstraintName("fk_assignment_requests_users_preferred_supervisor_id");
 
+                    b.HasOne("Worktime.Domain.Tenants.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_assignment_requests_tenants_tenant_id");
+
                     b.HasOne("Worktime.Domain.Users.User", null)
                         .WithMany()
                         .HasForeignKey("WorkerId")
@@ -318,8 +402,25 @@ namespace Worktime.Infrastructure.Persistence.Migrations
                         .HasConstraintName("fk_assignment_requests_users_worker_id");
                 });
 
+            modelBuilder.Entity("Worktime.Domain.Permissions.RolePermission", b =>
+                {
+                    b.HasOne("Worktime.Domain.Tenants.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_role_permissions_tenants_tenant_id");
+                });
+
             modelBuilder.Entity("Worktime.Domain.Punch.PunchSession", b =>
                 {
+                    b.HasOne("Worktime.Domain.Tenants.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_punch_sessions_tenants_tenant_id");
+
                     b.HasOne("Worktime.Domain.Users.User", null)
                         .WithMany()
                         .HasForeignKey("WorkerId")
@@ -335,10 +436,24 @@ namespace Worktime.Infrastructure.Persistence.Migrations
                         .HasForeignKey("SupervisorId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .HasConstraintName("fk_users_users_supervisor_id");
+
+                    b.HasOne("Worktime.Domain.Tenants.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_users_tenants_tenant_id");
                 });
 
             modelBuilder.Entity("Worktime.Domain.WorkLogs.WorkLog", b =>
                 {
+                    b.HasOne("Worktime.Domain.Tenants.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_work_logs_tenants_tenant_id");
+
                     b.HasOne("Worktime.Domain.Users.User", null)
                         .WithMany()
                         .HasForeignKey("WorkerId")
@@ -355,6 +470,13 @@ namespace Worktime.Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired()
                         .HasConstraintName("fk_work_log_events_users_actor_id");
+
+                    b.HasOne("Worktime.Domain.Tenants.Tenant", null)
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_work_log_events_tenants_tenant_id");
 
                     b.HasOne("Worktime.Domain.WorkLogs.WorkLog", null)
                         .WithMany("History")

@@ -89,20 +89,28 @@ public class WorkLogDecisionTests
         alreadyDecided.Decide(Decision.Approve, Guid.NewGuid(), null, Fake.Now);
         _logs.GetAsync(alreadyDecided.Id, Arg.Any<CancellationToken>()).Returns(alreadyDecided);
         var missing = Guid.NewGuid();
+        var scopesUsed = new List<Guid>();
 
         var services = new ServiceCollection()
+            .AddScoped(_ =>
+            {
+                var scoped = Substitute.For<ITenantContext>();
+                scoped.When(t => t.Use(Arg.Any<Guid>())).Do(ci => scopesUsed.Add(ci.Arg<Guid>()));
+                return scoped;
+            })
             .AddSingleton(_users).AddSingleton(_logs).AddSingleton(_uow)
             .AddSingleton(Fake.Clock()).AddSingleton(new KeyedLock()).AddSingleton(Fake.Metrics())
             .AddScoped<WorkLogDecider>()
             .BuildServiceProvider();
 
-        var results = await new DecideBatchHandler(services.GetRequiredService<IServiceScopeFactory>())
+        var results = await new DecideBatchHandler(services.GetRequiredService<IServiceScopeFactory>(), Fake.Tenant())
             .Handle(new DecideBatchCommand(Fake.ActorFor(_supervisor), [ok.Id, alreadyDecided.Id, missing], Decision.Approve, null), default);
 
         Assert.Equal(
             [BatchOutcome.Ok, BatchOutcome.Conflict, BatchOutcome.NotFound],
             results.Select(r => r.Outcome));
         Assert.Equal("worklog.already_decided", results[1].Code);
+        Assert.Equal([Fake.TenantId, Fake.TenantId, Fake.TenantId], scopesUsed); // each fresh scope inherits the tenant
     }
 
     [Fact]

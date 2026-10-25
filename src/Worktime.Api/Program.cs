@@ -80,10 +80,16 @@ public class Program // not static: WebApplicationFactory<Program> needs it as a
                     return Task.CompletedTask;
                 },
                 // Revocation: a token whose stamp is no longer current (reset, deactivation, permission change) is dead.
+                // Isolation: a token is only valid on its own tenant's host (TenantResolutionMiddleware ran first).
                 OnTokenValidated = async ctx =>
                 {
-                    var stamps = ctx.HttpContext.RequestServices.GetRequiredService<StampValidator>();
                     var principal = ctx.Principal!;
+                    if (principal.TenantId() != ctx.HttpContext.RequestServices.GetRequiredService<ITenantContext>().Id)
+                    {
+                        ctx.Fail("auth.wrong_tenant");
+                        return;
+                    }
+                    var stamps = ctx.HttpContext.RequestServices.GetRequiredService<StampValidator>();
                     if (!await stamps.IsCurrentAsync(principal.UserId(), principal.FindFirst(WorktimeClaims.Stamp)?.Value ?? "", ctx.HttpContext.RequestAborted))
                         ctx.Fail("auth.stale_session");
                 },
@@ -102,6 +108,7 @@ public class Program // not static: WebApplicationFactory<Program> needs it as a
     private static void AddWeb(IServiceCollection services, IConfiguration config)
     {
         services.Configure<DiagnosticsOptions>(config.GetSection(DiagnosticsOptions.Section));
+        services.Configure<TenancyOptions>(config.GetSection(TenancyOptions.Section));
         services.AddProblemDetails();
         services.AddExceptionHandler<ApiExceptionHandler>();
         services.AddControllers().AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
@@ -128,7 +135,8 @@ public class Program // not static: WebApplicationFactory<Program> needs it as a
         app.UseMiddleware<CorrelationIdMiddleware>();    // id available to every later log line
         app.UseMiddleware<RequestTimingMiddleware>();    // times everything below, including auth
         app.UseCors();
-        app.UseAuthentication();                         // who are you (validates JWT + stamp)
+        app.UseMiddleware<TenantResolutionMiddleware>(); // which tenant: from the Host, before the token is checked against it
+        app.UseAuthentication();                         // who are you (validates JWT + tenant + stamp)
         app.UseRateLimiter();                            // after routing data exists, before endpoints
         app.UseAuthorization();                          // may you (perm:* policies)
     }

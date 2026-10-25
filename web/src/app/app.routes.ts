@@ -1,10 +1,14 @@
 import { Routes } from '@angular/router';
 import { requireLogin, requirePerm } from './core/auth';
+import { onRootHost } from './core/tenancy';
 import { Perms } from './core/models';
 import { Shell } from './shell/shell';
 
 // One route per screen, gated by permission claims (not roles): the admin's matrix decides who sees what.
 export const routes: Routes = [
+  // Root host: only the space picker. On a tenant's host these never match and the app below takes over.
+  { path: '', pathMatch: 'full', canMatch: [onRootHost], loadComponent: () => import('./pages/tenant-picker').then(m => m.TenantPickerPage) },
+  { path: '**', canMatch: [onRootHost], redirectTo: '' },
   { path: 'login', loadComponent: () => import('./pages/login').then(m => m.LoginPage) },
   {
     path: '',

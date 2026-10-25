@@ -4,5 +4,5 @@ namespace Worktime.Application.Common.Interfaces;
 
 public interface ITokenIssuer
 {
-    IssuedToken Issue(User user, IReadOnlyCollection<string> permissions);
+    IssuedToken Issue(User user, Guid tenantId, IReadOnlyCollection<string> permissions);
 }

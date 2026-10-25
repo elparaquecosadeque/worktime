@@ -17,9 +17,11 @@ public sealed class WorktimeHub(IMediator mediator, WorktimeMetrics metrics) : H
     public override async Task OnConnectedAsync()
     {
         var actor = Context.User!.ToActor();
+        var tenantId = Context.User!.TenantId();
+        await Groups.AddToGroupAsync(Context.ConnectionId, RealtimeGroups.Tenant(tenantId));
         await Groups.AddToGroupAsync(Context.ConnectionId, RealtimeGroups.User(actor.Id));
         if (actor.Role == Role.Supervisor) await Groups.AddToGroupAsync(Context.ConnectionId, RealtimeGroups.Supervisor(actor.Id));
-        if (actor.Has(Perms.MonitorAll)) await Groups.AddToGroupAsync(Context.ConnectionId, RealtimeGroups.Admins);
+        if (actor.Has(Perms.MonitorAll)) await Groups.AddToGroupAsync(Context.ConnectionId, RealtimeGroups.Admins(tenantId));
 
         metrics.ConnectionOpened();
         await mediator.Send(new ConnectedCommand(actor.Id, actor.Role), Context.ConnectionAborted);
